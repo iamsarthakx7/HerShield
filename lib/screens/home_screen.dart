@@ -3,7 +3,6 @@ import '../services/shake_service.dart';
 import '../utils/app_state.dart';
 import 'emergency_screen.dart';
 import 'contacts_screen.dart';
-import 'login_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,19 +15,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ShakeService _shakeService = ShakeService();
 
-  // 🚨 SOS trigger with full safety logic
+  // 🚨 SOS trigger with safety checks
   void _triggerSOS() {
-    // ❌ Ignore if emergency already active
     if (AppState.emergencyActive) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Emergency already active'),
-        ),
+        const SnackBar(content: Text('Emergency already active')),
       );
       return;
     }
 
-    // ❌ Block if no contacts
     if (!AppState.hasContacts) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -38,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // ✅ Activate emergency
     AppState.emergencyActive = true;
 
     Navigator.push(
@@ -72,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 🔴 SOS Button (disabled during emergency)
+          // 🔴 SOS Button
           GestureDetector(
             onTap: AppState.emergencyActive ? null : _triggerSOS,
             child: Container(
@@ -104,63 +98,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 30),
 
-          // 👥 Manage Emergency Contacts (only after login)
-          if (AppState.isLoggedIn)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ContactsScreen(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Manage Emergency Contacts',
-                style: TextStyle(fontSize: 16),
-              ),
+          // 👥 Manage Emergency Contacts
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ContactsScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'Manage Emergency Contacts',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
 
           const SizedBox(height: 10),
 
-          // 🔐 Login / Register (only when NOT logged in)
-          if (!AppState.isLoggedIn)
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Login / Register',
-                style: TextStyle(fontSize: 14),
-              ),
+          // ⚙️ Settings
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'Settings',
+              style: TextStyle(fontSize: 14),
             ),
-
-          // ⚙️ Settings (only after login)
-          if (AppState.isLoggedIn)
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Settings',
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
+          ),
         ],
       ),
     );

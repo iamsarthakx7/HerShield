@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
-import '../utils/app_state.dart';
-import 'login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    debugPrint('🔥 LOGOUT BUTTON PRESSED');
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      debugPrint('✅ FIREBASE SIGNOUT DONE');
+
+      // 🔥 THIS IS THE FIX: CLEAR STACK
+      Navigator.of(context).popUntil((route) => route.isFirst);
+
+    } catch (e) {
+      debugPrint('❌ SIGNOUT ERROR: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logout failed')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,21 +34,18 @@ class SettingsScreen extends StatelessWidget {
           const ListTile(
             leading: Icon(Icons.person),
             title: Text('Profile'),
-            subtitle: Text('View or edit profile details'),
           ),
           const Divider(),
 
           const ListTile(
             leading: Icon(Icons.notifications),
             title: Text('Notifications'),
-            subtitle: Text('Manage alert preferences'),
           ),
           const Divider(),
 
           const ListTile(
             leading: Icon(Icons.location_on),
             title: Text('Location Access'),
-            subtitle: Text('Manage location permissions'),
           ),
           const Divider(),
 
@@ -42,20 +56,7 @@ class SettingsScreen extends StatelessWidget {
               'Logout',
               style: TextStyle(color: Colors.red),
             ),
-            onTap: () {
-              // 🔑 RESET APP STATE
-              AppState.isLoggedIn = false;
-              AppState.hasContacts = false;
-
-              // 🚪 GO TO LOGIN & CLEAR STACK
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
-                ),
-                    (route) => false,
-              );
-            },
+            onTap: () => _logout(context),
           ),
         ],
       ),

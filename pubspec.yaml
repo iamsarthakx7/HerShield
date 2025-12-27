@@ -30,8 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # Sensors & location
   sensors_plus: ^4.0.2
   geolocator: ^10.1.0
+
+  # 🔥 Firebase (REQUIRED)
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.0
 
 
 
