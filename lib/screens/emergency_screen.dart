@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -10,13 +11,17 @@ class EmergencyScreen extends StatefulWidget {
 
 class _EmergencyScreenState extends State<EmergencyScreen> {
   late Timer _timer;
+  late Timer _locationTimer;
   int _seconds = 0;
-  bool emergencyActive = true;
+
+  double? latitude;
+  double? longitude;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    _startLocationTracking();
   }
 
   void _startTimer() {
@@ -27,12 +32,31 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     });
   }
 
+  Future<void> _startLocationTracking() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    _locationTimer =
+        Timer.periodic(const Duration(seconds: 5), (timer) async {
+          Position position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+          );
+
+          setState(() {
+            latitude = position.latitude;
+            longitude = position.longitude;
+          });
+        });
+  }
+
   void _stopEmergency() {
     _timer.cancel();
-    setState(() {
-      emergencyActive = false;
-    });
-
+    _locationTimer.cancel();
     Navigator.pop(context);
   }
 
@@ -42,9 +66,15 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
+  String get mapsLink {
+    if (latitude == null || longitude == null) return 'Fetching location...';
+    return 'https://www.google.com/maps?q=$latitude,$longitude';
+  }
+
   @override
   void dispose() {
     _timer.cancel();
+    _locationTimer.cancel();
     super.dispose();
   }
 
@@ -60,13 +90,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.warning_rounded,
-            size: 100,
-            color: Colors.red,
-          ),
+          const Icon(Icons.warning_rounded, size: 100, color: Colors.red),
           const SizedBox(height: 20),
-
           const Text(
             'Emergency Active',
             style: TextStyle(
@@ -75,15 +100,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               color: Colors.red,
             ),
           ),
-
           const SizedBox(height: 10),
-
           const Text(
-            'Alerts sent to trusted contacts\nLive location sharing enabled',
-            textAlign: TextAlign.center,
+            'Live location sharing enabled',
             style: TextStyle(fontSize: 16),
           ),
-
           const SizedBox(height: 20),
 
           // ⏱ Timer
@@ -92,44 +113,25 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             style: const TextStyle(fontSize: 18),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
 
-          // 📞 Emergency Actions (UI only)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                ),
-                onPressed: () {
-                  // Call police later
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Calling Police (112)...')),
-                  );
-                },
-                icon: const Icon(Icons.local_police),
-                label: const Text('Police'),
-              ),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                ),
-                onPressed: () {
-                  // Call contact later
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Calling emergency contact...')),
-                  );
-                },
-                icon: const Icon(Icons.call),
-                label: const Text('Contact'),
-              ),
-            ],
+          // 📍 Location Info
+          Text(
+            latitude == null
+                ? 'Fetching location...'
+                : 'Lat: $latitude\nLng: $longitude',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 10),
+          Text(
+            mapsLink,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.blue),
           ),
 
           const SizedBox(height: 40),
 
-          // 🛑 Stop Emergency
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -137,10 +139,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
             ),
             onPressed: _stopEmergency,
-            child: const Text(
-              'STOP EMERGENCY',
-              style: TextStyle(fontSize: 16),
-            ),
+            child: const Text('STOP EMERGENCY'),
           ),
         ],
       ),
