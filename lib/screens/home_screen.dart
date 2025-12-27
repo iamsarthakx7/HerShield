@@ -3,6 +3,7 @@ import '../services/shake_service.dart';
 import 'emergency_screen.dart';
 import 'contacts_screen.dart';
 import 'login_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -78,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 30),
 
-          // 👥 Manage Contacts Button
+          // 👥 Manage Emergency Contacts
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -101,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 10),
 
-          // 🔐 Login / Register Button  ← ADDED HERE
+          // 🔐 Login / Register
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -113,6 +114,24 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: const Text(
               'Login / Register',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ⚙️ Settings
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'Settings',
               style: TextStyle(fontSize: 14),
             ),
           ),
