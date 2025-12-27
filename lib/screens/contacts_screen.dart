@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_state.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -11,12 +12,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
   final List<Map<String, String>> contacts = [];
 
   void _addContact() {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) {
-        final nameController = TextEditingController();
-        final phoneController = TextEditingController();
-
         return AlertDialog(
           title: const Text('Add Emergency Contact'),
           content: Column(
@@ -26,9 +27,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
               ),
+              const SizedBox(height: 10),
               TextField(
                 controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
+                decoration:
+                const InputDecoration(labelText: 'Phone Number'),
                 keyboardType: TextInputType.phone,
               ),
             ],
@@ -47,7 +50,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       'name': nameController.text,
                       'phone': phoneController.text,
                     });
+
+                    // ✅ MARK CONTACTS AS ADDED
+                    AppState.hasContacts = true;
                   });
+
                   Navigator.pop(context);
                 }
               },

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../utils/app_state.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -38,8 +40,16 @@ class LoginScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: () {
-                // Firebase auth later
-                Navigator.pop(context);
+                // ✅ LOGIN STATE SET
+                AppState.isLoggedIn = true;
+
+                // ✅ REMOVE LOGIN FROM STACK
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                );
               },
               child: const Text('Login'),
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'utils/app_state.dart';
 
 void main() {
   runApp(const HerShieldApp());
@@ -16,7 +18,11 @@ class HerShieldApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      home: const HomeScreen(),
+
+      // 🔑 ENTRY POINT LOGIC
+      home: AppState.isLoggedIn
+          ? const HomeScreen()
+          : const LoginScreen(),
     );
   }
 }

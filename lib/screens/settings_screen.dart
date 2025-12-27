@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../utils/app_state.dart';
+import 'login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -33,6 +35,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           const Divider(),
 
+          // 🔓 LOGOUT
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text(
@@ -40,8 +43,18 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(color: Colors.red),
             ),
             onTap: () {
-              // Firebase logout later
-              Navigator.pop(context);
+              // 🔑 RESET APP STATE
+              AppState.isLoggedIn = false;
+              AppState.hasContacts = false;
+
+              // 🚪 GO TO LOGIN & CLEAR STACK
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+                    (route) => false,
+              );
             },
           ),
         ],
