@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/shake_service.dart';
 import 'emergency_screen.dart';
 import 'contacts_screen.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -95,6 +96,24 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text(
               'Manage Emergency Contacts',
               style: TextStyle(fontSize: 16),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // 🔐 Login / Register Button  ← ADDED HERE
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'Login / Register',
+              style: TextStyle(fontSize: 14),
             ),
           ),
         ],
