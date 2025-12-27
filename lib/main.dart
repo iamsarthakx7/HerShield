@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const HerShieldApp());
@@ -15,14 +16,7 @@ class HerShieldApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'HerShield – Women Safety App',
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
