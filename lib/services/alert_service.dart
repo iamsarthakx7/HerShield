@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'whatsapp_service.dart';
 
 class AlertService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -31,29 +32,44 @@ class AlertService {
 
     for (var contact in contactsSnapshot.docs) {
       final contactName = contact['name'];
-      final phone = contact['phone'];
+      final rawPhone = contact['phone'];
+
+      // ✅ WhatsApp requires country code WITHOUT +
+      final phone = rawPhone.replaceAll('+', '').replaceAll(' ', '');
 
       final alertMessage = '''
 🚨 EMERGENCY ALERT 🚨
 
-Name: $userName
-Location: $mapsLink
+$userName needs help immediately!
 
-Please respond immediately.
+📍 Location:
+$mapsLink
+
+Please respond ASAP.
 ''';
 
-      // 🔥 STORE alert (SMS/WhatsApp ready)
+      // 🔥 Store alert in Firestore (for logs / demo)
       await _firestore.collection('alerts').add({
         'userId': user.uid,
         'userName': userName,
         'contactName': contactName,
-        'phone': phone,
+        'phone': rawPhone,
         'message': alertMessage,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // For now → debug output
-      print('ALERT SENT TO $contactName ($phone)');
+      // 📲 Open WhatsApp with prefilled message
+      try {
+        await WhatsAppService.openWhatsApp(
+          phone: phone,
+          message: alertMessage,
+        );
+      } catch (e) {
+        print('WhatsApp failed for $contactName: $e');
+      }
+
+      // 🧪 Debug log
+      print('ALERT PROCESSED FOR $contactName ($rawPhone)');
     }
   }
 }

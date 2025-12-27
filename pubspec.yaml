@@ -31,14 +31,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Sensors & location
+  # Location & sensors
   sensors_plus: ^4.0.2
   geolocator: ^10.1.0
 
-  # 🔥 Firebase (REQUIRED)
+  # Firebase core
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.0
-  cloud_firestore: ^5.4.4   # ✅ ADD THIS
+  cloud_firestore: ^5.4.4
+
+  # WhatsApp / links
+  url_launcher: ^6.3.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
