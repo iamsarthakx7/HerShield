@@ -1,68 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/contacts_service.dart';
 import '../utils/app_state.dart';
 
-class ContactsScreen extends StatefulWidget {
+class ContactsScreen extends StatelessWidget {
   const ContactsScreen({super.key});
 
-  @override
-  State<ContactsScreen> createState() => _ContactsScreenState();
-}
-
-class _ContactsScreenState extends State<ContactsScreen> {
-  final List<Map<String, String>> contacts = [];
-
-  void _addContact() {
+  void _showAddDialog(BuildContext context) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Emergency Contact'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: phoneController,
-                decoration:
-                const InputDecoration(labelText: 'Phone Number'),
-                keyboardType: TextInputType.phone,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+      builder: (_) => AlertDialog(
+        title: const Text('Add Emergency Contact'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty &&
-                    phoneController.text.isNotEmpty) {
-                  setState(() {
-                    contacts.add({
-                      'name': nameController.text,
-                      'phone': phoneController.text,
-                    });
-
-                    // ✅ MARK CONTACTS AS ADDED
-                    AppState.hasContacts = true;
-                  });
-
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: 'Phone'),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await ContactsService.addContact(
+                  name: nameController.text.trim(),
+                  phone: phoneController.text.trim(),
+                );
+
+                AppState.hasContacts = true;
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -73,22 +63,48 @@ class _ContactsScreenState extends State<ContactsScreen> {
         title: const Text('Emergency Contacts'),
         backgroundColor: Colors.red,
       ),
-      body: contacts.isEmpty
-          ? const Center(child: Text('No contacts added'))
-          : ListView.builder(
-        itemCount: contacts.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: const Icon(Icons.person),
-            title: Text(contacts[index]['name']!),
-            subtitle: Text(contacts[index]['phone']!),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.red,
-        onPressed: _addContact,
+        onPressed: () => _showAddDialog(context),
         child: const Icon(Icons.add),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: ContactsService.getContacts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          AppState.hasContacts = docs.isNotEmpty;
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text('No emergency contacts added'),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (_, index) {
+              final doc = docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+
+              return ListTile(
+                leading: const Icon(Icons.person),
+                title: Text(data['name']),
+                subtitle: Text(data['phone']),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    ContactsService.deleteContact(doc.id);
+                  },
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
