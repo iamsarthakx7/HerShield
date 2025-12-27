@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import '../utils/app_state.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -24,6 +25,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     _startLocationTracking();
   }
 
+  // ⏱ Emergency timer
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -32,6 +34,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     });
   }
 
+  // 📍 Real-time location tracking
   Future<void> _startLocationTracking() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
@@ -54,9 +57,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         });
   }
 
+  // 🛑 Stop emergency (IMPORTANT)
   void _stopEmergency() {
+    // 🔑 RESET SOS SAFETY FLAG
+    AppState.emergencyActive = false;
+
     _timer.cancel();
     _locationTimer.cancel();
+
     Navigator.pop(context);
   }
 
@@ -67,7 +75,9 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   }
 
   String get mapsLink {
-    if (latitude == null || longitude == null) return 'Fetching location...';
+    if (latitude == null || longitude == null) {
+      return 'Fetching location...';
+    }
     return 'https://www.google.com/maps?q=$latitude,$longitude';
   }
 
@@ -92,6 +102,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         children: [
           const Icon(Icons.warning_rounded, size: 100, color: Colors.red),
           const SizedBox(height: 20),
+
           const Text(
             'Emergency Active',
             style: TextStyle(
@@ -100,11 +111,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               color: Colors.red,
             ),
           ),
+
           const SizedBox(height: 10),
+
           const Text(
             'Live location sharing enabled',
             style: TextStyle(fontSize: 16),
           ),
+
           const SizedBox(height: 20),
 
           // ⏱ Timer
@@ -124,6 +138,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
           ),
 
           const SizedBox(height: 10),
+
+          // 🌍 Google Maps link
           Text(
             mapsLink,
             textAlign: TextAlign.center,
@@ -132,6 +148,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
           const SizedBox(height: 40),
 
+          // 🛑 Stop Emergency
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

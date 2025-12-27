@@ -16,18 +16,30 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ShakeService _shakeService = ShakeService();
 
-  // 🚨 SOS Trigger with flow logic
+  // 🚨 SOS trigger with full safety logic
   void _triggerSOS() {
-    if (!AppState.hasContacts) {
+    // ❌ Ignore if emergency already active
+    if (AppState.emergencyActive) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Please add at least one emergency contact first',
-          ),
+          content: Text('Emergency already active'),
         ),
       );
       return;
     }
+
+    // ❌ Block if no contacts
+    if (!AppState.hasContacts) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add at least one emergency contact first'),
+        ),
+      );
+      return;
+    }
+
+    // ✅ Activate emergency
+    AppState.emergencyActive = true;
 
     Navigator.push(
       context,
@@ -60,14 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 🔴 SOS Button (always visible)
+          // 🔴 SOS Button (disabled during emergency)
           GestureDetector(
-            onTap: _triggerSOS,
+            onTap: AppState.emergencyActive ? null : _triggerSOS,
             child: Container(
               height: 200,
               width: 200,
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: AppState.emergencyActive ? Colors.grey : Colors.red,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
