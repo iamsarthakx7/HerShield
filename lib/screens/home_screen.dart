@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/shake_service.dart';
+import 'emergency_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,10 +14,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final ShakeService _shakeService = ShakeService();
 
   void _triggerSOS() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('🚨 SOS Triggered')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EmergencyScreen(),
+      ),
     );
   }
+
 
   @override
   void initState() {
