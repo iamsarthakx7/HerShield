@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../constants/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool loading = false;
   bool isRegisterMode = false;
 
-  // 🔐 LOGIN EXISTING USER
+  // 🔐 LOGIN
   Future<void> _login() async {
     if (_emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
@@ -32,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Navigation handled by authStateChanges() in main.dart
     } on FirebaseAuthException catch (e) {
       _showMessage(e.message ?? 'Login failed');
     }
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => loading = false);
   }
 
-  // 🆕 REGISTER NEW USER
+  // 🆕 REGISTER
   Future<void> _register() async {
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
@@ -49,15 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (_passwordController.text.length < 6) {
-      _showMessage('Password must be at least 6 characters');
-      return;
-    }
-
     setState(() => loading = true);
 
     try {
-      // 1️⃣ Create Firebase Auth user
       UserCredential credential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -65,11 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final user = credential.user!;
-
-      // 2️⃣ Save display name in Firebase Auth
       await user.updateDisplayName(_nameController.text.trim());
 
-      // 3️⃣ Save user profile in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -79,13 +70,8 @@ class _LoginScreenState extends State<LoginScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // 🔁 Switch back to login mode
-      setState(() {
-        isRegisterMode = false;
-      });
-
-      _showMessage('Account created successfully. Please login.');
-
+      setState(() => isRegisterMode = false);
+      _showMessage('Account created. Please login.');
     } on FirebaseAuthException catch (e) {
       _showMessage(e.message ?? 'Registration failed');
     }
@@ -95,104 +81,160 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        backgroundColor: AppColors.primary,
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _nameController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isRegisterMode ? 'Register' : 'Login'),
-        backgroundColor: Colors.red,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            const Icon(Icons.security, size: 80, color: Colors.red),
-            const SizedBox(height: 30),
-
-            // 👤 Name (Register only)
-            if (isRegisterMode)
-              Column(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Card(
+            elevation: 8,
+            color: AppColors.secondary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      border: OutlineInputBorder(),
+                  const SizedBox(height: 10),
+
+                  // 🔐 ICON
+                  Icon(Icons.security,
+                      size: 70, color: AppColors.primary),
+
+                  const SizedBox(height: 16),
+
+                  // 🏷️ TITLE
+                  Text(
+                    isRegisterMode ? 'Sign Up' : 'Welcome Back',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 20),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    isRegisterMode
+                        ? 'Create your account'
+                        : 'Login to continue',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // 👤 NAME
+                  if (isRegisterMode) ...[
+                    pinkTextField(
+                      controller: _nameController,
+                      hint: 'Enter Name',
+                      icon: Icons.person,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // 📧 EMAIL
+                  pinkTextField(
+                    controller: _emailController,
+                    hint: 'Enter Email',
+                    icon: Icons.email,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 🔑 PASSWORD
+                  pinkTextField(
+                    controller: _passwordController,
+                    hint: 'Enter Password',
+                    icon: Icons.lock,
+                    obscureText: true,
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // 🔘 BUTTON
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    onPressed: loading
+                        ? null
+                        : isRegisterMode
+                        ? _register
+                        : _login,
+                    child: loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                      isRegisterMode ? 'Sign Up' : 'Login',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 🔁 SWITCH
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isRegisterMode = !isRegisterMode;
+                      });
+                    },
+                    child: Text(
+                      isRegisterMode
+                          ? 'Already have an account? Login'
+                          : 'New user? Create account',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ),
                 ],
               ),
-
-            // 📧 Email
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 20),
-
-            // 🔑 Password
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // 🔘 Primary Button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              onPressed: loading
-                  ? null
-                  : isRegisterMode
-                  ? _register
-                  : _login,
-              child: loading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(isRegisterMode ? 'Create Account' : 'Login'),
-            ),
-
-            const SizedBox(height: 10),
-
-            // 🔁 Switch Mode
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  isRegisterMode = !isRegisterMode;
-                });
-              },
-              child: Text(
-                isRegisterMode
-                    ? 'Already have an account? Login'
-                    : 'New user? Create account',
-              ),
-            ),
-          ],
+  // 🌸 SOFT PINK TEXTFIELD
+  Widget pinkTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, color: Colors.black54),
+        filled: true,
+        fillColor: const Color(0xFFFEB7C9),
+        contentPadding:
+        const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
       ),
     );

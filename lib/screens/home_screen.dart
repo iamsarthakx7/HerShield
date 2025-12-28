@@ -4,6 +4,8 @@ import '../utils/app_state.dart';
 import 'emergency_screen.dart';
 import 'contacts_screen.dart';
 import 'settings_screen.dart';
+import '../constants/app_colors.dart';
+
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -52,29 +54,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('HerShield'),
-        backgroundColor: Colors.red,
+        title: const Text(
+          'HerShield',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         centerTitle: true,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const Spacer(),
+
+          // 🚨 SOS BUTTON
           GestureDetector(
-            onTap: _triggerSOS,
+            onTap: AppState.emergencyActive ? null : _triggerSOS,
             child: Container(
-              height: 200,
-              width: 200,
+              height: 220,
+              width: 220,
               decoration: BoxDecoration(
-                color: Colors.red,
                 shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: AppState.emergencyActive
+                      ? [Colors.grey, Colors.grey.shade600]
+                      : [
+                    AppColors.primary,
+                    AppColors.emergency,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.red.withOpacity(0.5),
-                    blurRadius: 20,
-                    spreadRadius: 5,
+                    color: AppColors.primary.withOpacity(0.45),
+                    blurRadius: 30,
+                    spreadRadius: 8,
                   ),
                 ],
               ),
@@ -82,9 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   'SOS',
                   style: TextStyle(
-                    fontSize: 48,
-                    color: Colors.white,
+                    fontSize: 46,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 2,
                   ),
                 ),
               ),
@@ -93,28 +115,72 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 30),
 
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ContactsScreen()),
-              );
-            },
-            child: const Text('Manage Emergency Contacts'),
+          Text(
+            'Tap in emergency',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
           ),
 
+          const Spacer(),
+
+          // 👥 MANAGE CONTACTS
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ContactsScreen(),
+                  ),
+                );
+                _syncContactsSilently();
+              },
+              child: const Text(
+                'Manage Emergency Contacts',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ⚙️ SETTINGS
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
               );
             },
-            child: const Text('Settings'),
+            child: Text(
+              'Settings',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
           ),
+
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
+
+  void _syncContactsSilently() {}
+
+
 }
