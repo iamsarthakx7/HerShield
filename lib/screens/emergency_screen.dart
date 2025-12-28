@@ -6,6 +6,7 @@ import '../utils/app_state.dart';
 import '../services/sos_service.dart';
 import '../services/alert_service.dart';
 import '../services/nearby_help_service.dart';
+import '../constants/app_colors.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -29,7 +30,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   void initState() {
     super.initState();
 
-    // ⏱ Resume timer if emergency already active
     if (AppState.emergencyStartTime > 0) {
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       _seconds = now - AppState.emergencyStartTime;
@@ -42,23 +42,19 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     _startLocationTracking();
   }
 
-  // ⏱ UI timer
   void _startUiTimer() {
     _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => _seconds++);
     });
   }
 
-  // 📍 Location + SOS + Alerts
   Future<void> _startLocationTracking() async {
-    // 1️⃣ Check GPS service
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _showError('Please enable location services');
       return;
     }
 
-    // 2️⃣ Permission handling
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -71,16 +67,12 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       return;
     }
 
-    // 3️⃣ Fast last-known location
     final last = await Geolocator.getLastKnownPosition();
     if (last != null) {
-      setState(() {
-        latitude = last.latitude;
-        longitude = last.longitude;
-      });
+      latitude = last.latitude;
+      longitude = last.longitude;
     }
 
-    // 4️⃣ Accurate GPS
     final pos = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -90,7 +82,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       longitude = pos.longitude;
     });
 
-    // 🔥 Create SOS ONCE
     if (AppState.activeSosId == null) {
       AppState.activeSosId = await _sosService.startSOS(
         latitude: latitude!,
@@ -98,7 +89,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       );
     }
 
-    // 🚨 Send alerts ONCE
     if (!AppState.alertSent) {
       await _alertService.sendSOSAlert(
         latitude: latitude!,
@@ -107,7 +97,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       AppState.alertSent = true;
     }
 
-    // 🔄 Location updates
     _locationTimer =
         Timer.periodic(const Duration(seconds: 5), (_) async {
           final p = await Geolocator.getCurrentPosition(
@@ -129,7 +118,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         });
   }
 
-  // 🛑 Stop emergency
   Future<void> _stopEmergency() async {
     AppState.emergencyActive = false;
     AppState.alertSent = false;
@@ -144,7 +132,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.emergency,
+      ),
     );
   }
 
@@ -161,84 +152,161 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red.shade50,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Emergency Mode'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.emergency,
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.warning_rounded, size: 100, color: Colors.red),
-          const SizedBox(height: 10),
-
-          Text(
-            'Active for ${_format(_seconds)}',
-            style: const TextStyle(fontSize: 18),
-          ),
-
-          const SizedBox(height: 20),
-
-          Text(
-            latitude == null
-                ? 'Fetching location...'
-                : 'Lat: $latitude\nLng: $longitude',
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 10),
-
-          if (latitude != null && longitude != null)
-            Text(
-              'https://www.google.com/maps?q=$latitude,$longitude',
-              style: const TextStyle(color: Colors.blue),
-              textAlign: TextAlign.center,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height * 0.75,
             ),
-
-          const SizedBox(height: 25),
-
-          // 🚓 Police & 🏥 Hospital
-          if (latitude != null && longitude != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.local_police),
-                  label: const Text('Police'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                // 🔴 STATUS ICON
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    shape: BoxShape.circle,
                   ),
-                  onPressed: () {
-                    NearbyHelpService.openPolice(latitude!, longitude!);
-                  },
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    size: 60,
+                    color: AppColors.emergency,
+                  ),
                 ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.local_hospital),
-                  label: const Text('Hospital'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Emergency Active',
+                  style:
+                  Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppColors.emergency,
+                    fontWeight: FontWeight.bold,
                   ),
-                  onPressed: () {
-                    NearbyHelpService.openHospital(latitude!, longitude!);
-                  },
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  'Active for ${_format(_seconds)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // 📍 LOCATION CARD
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Current Location',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          latitude == null
+                              ? 'Fetching location...'
+                              : 'Latitude: $latitude\nLongitude: $longitude',
+                          textAlign: TextAlign.center,
+                        ),
+                        if (latitude != null && longitude != null) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            'https://www.google.com/maps?q=$latitude,$longitude',
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontSize: 13,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // 🚓 QUICK ACTIONS
+                if (latitude != null && longitude != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.local_police),
+                          label: const Text('Police'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            minimumSize: const Size.fromHeight(50),
+                          ),
+                          onPressed: () {
+                            NearbyHelpService.openPolice(
+                              latitude!,
+                              longitude!,
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.local_hospital),
+                          label: const Text('Hospital'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            minimumSize: const Size.fromHeight(50),
+                          ),
+                          onPressed: () {
+                            NearbyHelpService.openHospital(
+                              latitude!,
+                              longitude!,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                const SizedBox(height: 36),
+
+                // 🛑 STOP BUTTON
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.emergency,
+                    minimumSize: const Size(double.infinity, 52),
+                  ),
+                  onPressed: _stopEmergency,
+                  child: const Text(
+                    'STOP EMERGENCY',
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
-
-          const SizedBox(height: 35),
-
-          // 🛑 STOP
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding:
-              const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-            ),
-            onPressed: _stopEmergency,
-            child: const Text('STOP EMERGENCY'),
           ),
-        ],
+        ),
       ),
     );
   }
