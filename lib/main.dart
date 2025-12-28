@@ -19,38 +19,31 @@ class HerShieldApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'HerShield',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
-
-      // 🔥 SINGLE SOURCE OF AUTH NAVIGATION
-      home: AuthGate(),
+      theme: ThemeData(primarySwatch: Colors.red),
+      home: const AuthGate(),
     );
   }
 }
 
-/// ✅ AuthGate decides which screen to show
 class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        debugPrint('🔁 AUTH STATE: ${snapshot.data}');
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // 🔓 Logged out
         if (!snapshot.hasData) {
           return const LoginScreen();
         }
 
-        // 🔐 Logged in
-        return const HomeScreen();
+        return HomeScreen(); // ✅ WORKS ONLY IF IMPORT IS CORRECT
       },
     );
   }

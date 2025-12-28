@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../utils/app_state.dart';
 import '../services/sos_service.dart';
 import '../services/alert_service.dart';
-import '../services/nearby_service.dart';
+import '../services/nearby_help_service.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -15,123 +15,146 @@ class EmergencyScreen extends StatefulWidget {
 }
 
 class _EmergencyScreenState extends State<EmergencyScreen> {
-  // ⏱ Timers
-  late Timer _timer;
-  late Timer _locationTimer;
+  Timer? _uiTimer;
+  Timer? _locationTimer;
 
   int _seconds = 0;
-
-  // 📍 Location
   double? latitude;
   double? longitude;
 
-  // 🔥 Services
   final SosService _sosService = SosService();
   final AlertService _alertService = AlertService();
-
-  String? sosId;
-  bool alertSent = false;
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
+
+    // ⏱ Resume timer if emergency already active
+    if (AppState.emergencyStartTime > 0) {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      _seconds = now - AppState.emergencyStartTime;
+    } else {
+      AppState.emergencyStartTime =
+          DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    }
+
+    _startUiTimer();
     _startLocationTracking();
   }
 
-  // ⏱ Emergency timer
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+  // ⏱ UI timer
+  void _startUiTimer() {
+    _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => _seconds++);
     });
   }
 
-  // 📍 Location tracking + Firestore + Alerts
+  // 📍 Location + SOS + Alerts
   Future<void> _startLocationTracking() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    // 1️⃣ Check GPS service
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _showError('Please enable location services');
+      return;
+    }
 
+    // 2️⃣ Permission handling
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
-    // 🔹 Initial location
-    Position position = await Geolocator.getCurrentPosition(
+    if (permission == LocationPermission.deniedForever) {
+      _showError(
+        'Location permission permanently denied.\nEnable it from Settings.',
+      );
+      return;
+    }
+
+    // 3️⃣ Fast last-known location
+    final last = await Geolocator.getLastKnownPosition();
+    if (last != null) {
+      setState(() {
+        latitude = last.latitude;
+        longitude = last.longitude;
+      });
+    }
+
+    // 4️⃣ Accurate GPS
+    final pos = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    latitude = position.latitude;
-    longitude = position.longitude;
+    setState(() {
+      latitude = pos.latitude;
+      longitude = pos.longitude;
+    });
 
-    // 🔥 Create SOS event
-    sosId = await _sosService.startSOS(
-      latitude: latitude!,
-      longitude: longitude!,
-    );
+    // 🔥 Create SOS ONCE
+    if (AppState.activeSosId == null) {
+      AppState.activeSosId = await _sosService.startSOS(
+        latitude: latitude!,
+        longitude: longitude!,
+      );
+    }
 
     // 🚨 Send alerts ONCE
-    if (!alertSent) {
+    if (!AppState.alertSent) {
       await _alertService.sendSOSAlert(
         latitude: latitude!,
         longitude: longitude!,
       );
-      alertSent = true;
+      AppState.alertSent = true;
     }
 
-    // 🔄 Update location every 5 seconds
+    // 🔄 Location updates
     _locationTimer =
         Timer.periodic(const Duration(seconds: 5), (_) async {
-          Position pos = await Geolocator.getCurrentPosition(
+          final p = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           );
 
           setState(() {
-            latitude = pos.latitude;
-            longitude = pos.longitude;
+            latitude = p.latitude;
+            longitude = p.longitude;
           });
 
-          if (sosId != null) {
+          if (AppState.activeSosId != null) {
             await _sosService.updateLocation(
-              sosId: sosId!,
-              latitude: pos.latitude,
-              longitude: pos.longitude,
+              sosId: AppState.activeSosId!,
+              latitude: p.latitude,
+              longitude: p.longitude,
             );
           }
         });
   }
 
-  // 🛑 Stop Emergency
+  // 🛑 Stop emergency
   Future<void> _stopEmergency() async {
     AppState.emergencyActive = false;
+    AppState.alertSent = false;
+    AppState.activeSosId = null;
+    AppState.emergencyStartTime = 0;
 
-    _timer.cancel();
-    _locationTimer.cancel();
-
-    if (sosId != null) {
-      await _sosService.stopSOS(sosId!);
-    }
+    _uiTimer?.cancel();
+    _locationTimer?.cancel();
 
     Navigator.pop(context);
   }
 
-  String _formatTime(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
-  String get mapsLink {
-    if (latitude == null || longitude == null) {
-      return 'Fetching location...';
-    }
-    return 'https://www.google.com/maps?q=$latitude,$longitude';
-  }
+  String _format(int s) =>
+      '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
 
   @override
   void dispose() {
-    _timer.cancel();
-    _locationTimer.cancel();
+    _uiTimer?.cancel();
+    _locationTimer?.cancel();
     super.dispose();
   }
 
@@ -148,35 +171,15 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.warning_rounded, size: 100, color: Colors.red),
-          const SizedBox(height: 20),
-
-          const Text(
-            'Emergency Active',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-            ),
-          ),
-
           const SizedBox(height: 10),
 
-          const Text(
-            'Live location & alerts enabled',
-            style: TextStyle(fontSize: 16),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ⏱ Timer
           Text(
-            'Active for ${_formatTime(_seconds)}',
+            'Active for ${_format(_seconds)}',
             style: const TextStyle(fontSize: 18),
           ),
 
           const SizedBox(height: 20),
 
-          // 📍 Location
           Text(
             latitude == null
                 ? 'Fetching location...'
@@ -186,56 +189,46 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
           const SizedBox(height: 10),
 
-          // 🌍 Maps link
-          Text(
-            mapsLink,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.blue),
-          ),
+          if (latitude != null && longitude != null)
+            Text(
+              'https://www.google.com/maps?q=$latitude,$longitude',
+              style: const TextStyle(color: Colors.blue),
+              textAlign: TextAlign.center,
+            ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 25),
 
-          // 🚓 Nearby Help Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+          // 🚓 Police & 🏥 Hospital
+          if (latitude != null && longitude != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.local_police),
+                  label: const Text('Police'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: () {
+                    NearbyHelpService.openPolice(latitude!, longitude!);
+                  },
                 ),
-                onPressed: latitude == null
-                    ? null
-                    : () {
-                  NearbyService.openPolice(
-                    latitude: latitude!,
-                    longitude: longitude!,
-                  );
-                },
-                icon: const Icon(Icons.local_police),
-                label: const Text('Police'),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.local_hospital),
+                  label: const Text('Hospital'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  onPressed: () {
+                    NearbyHelpService.openHospital(latitude!, longitude!);
+                  },
                 ),
-                onPressed: latitude == null
-                    ? null
-                    : () {
-                  NearbyService.openHospital(
-                    latitude: latitude!,
-                    longitude: longitude!,
-                  );
-                },
-                icon: const Icon(Icons.local_hospital),
-                label: const Text('Hospital'),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 35),
 
-          // 🛑 Stop Emergency
+          // 🛑 STOP
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

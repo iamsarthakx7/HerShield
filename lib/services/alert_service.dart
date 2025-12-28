@@ -1,29 +1,60 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'contacts_service.dart';
 import 'whatsapp_service.dart';
 
 class AlertService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // 🔥 Send alert to all emergency contacts
+  /// 🚨 MAIN ENTRY POINT
   Future<void> sendSOSAlert({
     required double latitude,
     required double longitude,
   }) async {
+    final mapsLink =
+        'https://www.google.com/maps?q=$latitude,$longitude';
+
+    final baseMessage = '''
+🚨 EMERGENCY ALERT 🚨
+
+I need help immediately!
+
+📍 Location:
+$mapsLink
+''';
+
+    final hasInternet = await _checkInternet();
+
+    if (hasInternet) {
+      try {
+        await _sendOnline(baseMessage);
+      } catch (_) {
+        // 🔥 HARD FALLBACK
+        await _sendOfflineSMS(baseMessage);
+      }
+    } else {
+      // 📵 PURE OFFLINE
+      await _sendOfflineSMS(baseMessage);
+    }
+  }
+
+  // ===============================
+  // 🌐 ONLINE MODE
+  // ===============================
+  Future<void> _sendOnline(String baseMessage) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // 1️⃣ Fetch user profile
     final userDoc =
     await _firestore.collection('users').doc(user.uid).get();
 
     final userName = userDoc.data()?['name'] ?? 'Unknown';
+    final fullMessage = 'Name: $userName\n\n$baseMessage';
 
-    final mapsLink =
-        'https://www.google.com/maps?q=$latitude,$longitude';
-
-    // 2️⃣ Fetch emergency contacts
     final contactsSnapshot = await _firestore
         .collection('users')
         .doc(user.uid)
@@ -31,45 +62,76 @@ class AlertService {
         .get();
 
     for (var contact in contactsSnapshot.docs) {
-      final contactName = contact['name'];
       final rawPhone = contact['phone'];
-
-      // ✅ WhatsApp requires country code WITHOUT +
       final phone = rawPhone.replaceAll('+', '').replaceAll(' ', '');
 
-      final alertMessage = '''
-🚨 EMERGENCY ALERT 🚨
+      // 📩 SMS (ALWAYS)
+      await _sendSMS(phone, fullMessage);
 
-$userName needs help immediately!
-
-📍 Location:
-$mapsLink
-
-Please respond ASAP.
-''';
-
-      // 🔥 Store alert in Firestore (for logs / demo)
-      await _firestore.collection('alerts').add({
-        'userId': user.uid,
-        'userName': userName,
-        'contactName': contactName,
-        'phone': rawPhone,
-        'message': alertMessage,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      // 📲 Open WhatsApp with prefilled message
+      // 📲 WhatsApp (BEST EFFORT)
       try {
         await WhatsAppService.openWhatsApp(
           phone: phone,
-          message: alertMessage,
+          message: fullMessage,
         );
-      } catch (e) {
-        print('WhatsApp failed for $contactName: $e');
-      }
+      } catch (_) {}
 
-      // 🧪 Debug log
-      print('ALERT PROCESSED FOR $contactName ($rawPhone)');
+      // 🔥 Log alert (non-blocking)
+      try {
+        await _firestore.collection('alerts').add({
+          'userId': user.uid,
+          'contactName': contact['name'],
+          'phone': rawPhone,
+          'message': fullMessage,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      } catch (_) {}
+    }
+  }
+
+  // ===============================
+  // 📵 OFFLINE MODE (CRITICAL)
+  // ===============================
+  Future<void> _sendOfflineSMS(String message) async {
+    final offlineContacts =
+    await ContactsService.getOfflineContacts();
+
+    for (var contact in offlineContacts) {
+      final phone =
+      contact['phone']!.replaceAll('+', '').replaceAll(' ', '');
+
+      await _sendSMS(phone, message);
+    }
+  }
+
+  // ===============================
+  // 📩 SMS SENDER (OFFLINE SAFE)
+  // ===============================
+  Future<void> _sendSMS(String phone, String message) async {
+    final uri = Uri.parse(
+      'sms:$phone?body=${Uri.encodeComponent(message)}',
+    );
+
+    try {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      print('SMS launch failed: $e');
+    }
+  }
+
+  // ===============================
+  // 🌐 FAST INTERNET CHECK
+  // ===============================
+  Future<bool> _checkInternet() async {
+    try {
+      final result =
+      await InternetAddress.lookup('google.com');
+      return result.isNotEmpty;
+    } catch (_) {
+      return false;
     }
   }
 }

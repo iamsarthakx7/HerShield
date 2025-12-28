@@ -7,13 +7,17 @@ class WhatsAppService {
   }) async {
     final encodedMessage = Uri.encodeComponent(message);
 
-    final Uri url = Uri.parse(
+    final url = Uri.parse(
       'https://wa.me/$phone?text=$encodedMessage',
     );
 
-    await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    );
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw 'Could not open WhatsApp';
+    }
   }
 }

@@ -1,8 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ✅ LOCATION PERMISSIONS -->
+    <!-- 📍 LOCATION PERMISSIONS -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- 🎙️ AUDIO RECORDING (SOS PROOF) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <!-- 📂 STORAGE (for audio file saving) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
 
     <application
         android:label="hershield"
@@ -35,25 +43,27 @@
             android:value="2"/>
     </application>
 
-    <!-- ✅ REQUIRED FOR url_launcher / WhatsApp / Maps (ANDROID 11+) -->
+    <!-- 🔗 REQUIRED FOR url_launcher / WhatsApp / Maps (Android 11+) -->
     <queries>
-        <!-- For WhatsApp & browser links -->
+
+        <!-- WhatsApp & browser links -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
 
-        <!-- For Google Maps -->
+        <!-- Google Maps -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="geo"/>
         </intent>
 
-        <!-- Existing text processing (keep this) -->
+        <!-- Text processing (keep) -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+
     </queries>
 
 </manifest>

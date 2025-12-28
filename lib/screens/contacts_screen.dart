@@ -76,7 +76,6 @@ class ContactsScreen extends StatelessWidget {
           }
 
           final docs = snapshot.data?.docs ?? [];
-
           AppState.hasContacts = docs.isNotEmpty;
 
           if (docs.isEmpty) {
@@ -97,8 +96,11 @@ class ContactsScreen extends StatelessWidget {
                 subtitle: Text(data['phone']),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    ContactsService.deleteContact(doc.id);
+                  onPressed: () async {
+                    await ContactsService.deleteContact(
+                      contactId: doc.id,
+                      phone: data['phone'],
+                    );
                   },
                 ),
               );
