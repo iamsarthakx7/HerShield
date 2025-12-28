@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../constants/app_colors.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -11,9 +13,8 @@ class SettingsScreen extends StatelessWidget {
       await FirebaseAuth.instance.signOut();
       debugPrint('✅ FIREBASE SIGNOUT DONE');
 
-      // 🔥 THIS IS THE FIX: CLEAR STACK
+      // 🔥 Clear navigation stack
       Navigator.of(context).popUntil((route) => route.isFirst);
-
     } catch (e) {
       debugPrint('❌ SIGNOUT ERROR: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -25,38 +26,61 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
+        centerTitle: true,
       ),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          const ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile'),
-          ),
-          const Divider(),
-
-          const ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Notifications'),
-          ),
-          const Divider(),
-
-          const ListTile(
-            leading: Icon(Icons.location_on),
-            title: Text('Location Access'),
-          ),
-          const Divider(),
-
-          // 🔓 LOGOUT
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
+          // 🔹 GENERAL SECTION
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-            onTap: () => _logout(context),
+            child: Column(
+              children: const [
+                ListTile(
+                  leading: Icon(Icons.person, color: AppColors.primary),
+                  title: Text('Profile'),
+                ),
+                Divider(height: 1),
+                ListTile(
+                  leading:
+                  Icon(Icons.notifications, color: AppColors.primary),
+                  title: Text('Notifications'),
+                ),
+                Divider(height: 1),
+                ListTile(
+                  leading:
+                  Icon(Icons.location_on, color: AppColors.primary),
+                  title: Text('Location Access'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // 🔓 LOGOUT SECTION
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading:
+              const Icon(Icons.logout, color: AppColors.emergency),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: AppColors.emergency,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () => _logout(context),
+            ),
           ),
         ],
       ),
