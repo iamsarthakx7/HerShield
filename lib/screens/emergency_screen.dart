@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../utils/app_state.dart';
 import '../services/sos_service.dart';
 import '../services/alert_service.dart';
+import '../services/nearby_service.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -45,7 +46,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     });
   }
 
-  // 📍 Location tracking + Firestore
+  // 📍 Location tracking + Firestore + Alerts
   Future<void> _startLocationTracking() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
@@ -63,7 +64,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     latitude = position.latitude;
     longitude = position.longitude;
 
-    // 🔥 Create SOS event in Firestore
+    // 🔥 Create SOS event
     sosId = await _sosService.startSOS(
       latitude: latitude!,
       longitude: longitude!,
@@ -192,9 +193,49 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             style: const TextStyle(color: Colors.blue),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
 
-          // 🛑 Stop
+          // 🚓 Nearby Help Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                ),
+                onPressed: latitude == null
+                    ? null
+                    : () {
+                  NearbyService.openPolice(
+                    latitude: latitude!,
+                    longitude: longitude!,
+                  );
+                },
+                icon: const Icon(Icons.local_police),
+                label: const Text('Police'),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                onPressed: latitude == null
+                    ? null
+                    : () {
+                  NearbyService.openHospital(
+                    latitude: latitude!,
+                    longitude: longitude!,
+                  );
+                },
+                icon: const Icon(Icons.local_hospital),
+                label: const Text('Hospital'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 30),
+
+          // 🛑 Stop Emergency
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
