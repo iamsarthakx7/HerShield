@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../services/shake_service.dart';
 import '../utils/app_state.dart';
 import 'emergency_screen.dart';
@@ -15,24 +18,31 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ShakeService _shakeService = ShakeService();
 
-  // 🚨 SOS trigger with safety checks
+  // 🔍 Background contact sync (NON-BLOCKING)
+  Future<void> _syncContactsSilently() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('contacts')
+          .limit(1)
+          .get();
+
+      AppState.hasContacts = snapshot.docs.isNotEmpty;
+      AppState.contactsChecked = true;
+    } catch (_) {
+      // Fail silently — never block SOS
+    }
+  }
+
+  // 🚨 INSTANT SOS (OPTIMISTIC TRIGGER)
   void _triggerSOS() {
-    if (AppState.emergencyActive) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Emergency already active')),
-      );
-      return;
-    }
+    if (AppState.emergencyActive) return;
 
-    if (!AppState.hasContacts) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one emergency contact first'),
-        ),
-      );
-      return;
-    }
-
+    // 🚀 START SOS IMMEDIATELY (NO DELAY)
     AppState.emergencyActive = true;
 
     Navigator.push(
@@ -41,12 +51,31 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => const EmergencyScreen(),
       ),
     );
+
+    // ⚠️ Background validation (NON-BLOCKING)
+    if (AppState.contactsChecked && !AppState.hasContacts) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '⚠️ No emergency contacts found. Please add contacts.',
+            ),
+          ),
+        );
+      });
+    }
   }
 
   @override
   void initState() {
     super.initState();
+
+    // 🎯 Start shake detection
     _shakeService.startListening(_triggerSOS);
+
+    // 🔍 Sync contacts silently in background
+    _syncContactsSilently();
   }
 
   @override
@@ -66,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 🔴 SOS Button
+          // 🔴 SOS BUTTON (ALWAYS AVAILABLE)
           GestureDetector(
             onTap: AppState.emergencyActive ? null : _triggerSOS,
             child: Container(
@@ -98,20 +127,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 30),
 
-          // 👥 Manage Emergency Contacts
+          // 👥 Manage Contacts
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               padding:
               const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ContactsScreen(),
                 ),
               );
+
+              // 🔄 Re-sync after returning
+              _syncContactsSilently();
             },
             child: const Text(
               'Manage Emergency Contacts',
