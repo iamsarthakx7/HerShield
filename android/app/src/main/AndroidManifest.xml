@@ -4,13 +4,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-    <!-- 🎙️ AUDIO RECORDING (SOS PROOF) -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- 🔔 NOTIFICATIONS (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <!-- 📂 STORAGE (for audio file saving) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
+    <!-- 🎙️ AUDIO RECORDING (SOS PROOF – future ready) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <application
         android:label="hershield"
@@ -37,33 +35,22 @@
             </intent-filter>
         </activity>
 
-        <!-- Flutter embedding -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
     </application>
 
-    <!-- 🔗 REQUIRED FOR url_launcher / WhatsApp / Maps (Android 11+) -->
+    <!-- 🔗 REQUIRED FOR url_launcher / WhatsApp / Maps -->
     <queries>
-
-        <!-- WhatsApp & browser links -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
 
-        <!-- Google Maps -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="geo"/>
         </intent>
-
-        <!-- Text processing (keep) -->
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-
     </queries>
 
 </manifest>

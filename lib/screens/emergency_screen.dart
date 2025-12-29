@@ -25,6 +25,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   final SosService _sosService = SosService();
   final AlertService _alertService = AlertService();
 
+  bool _sosEnded = false; // 🔒 PREVENT DOUBLE STOP
+
   @override
   void initState() {
     super.initState();
@@ -45,20 +47,21 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   // ⏱ UI timer
   void _startUiTimer() {
     _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => _seconds++);
+      if (mounted) {
+        setState(() => _seconds++);
+      }
     });
   }
 
   // 📍 Location + SOS + Alerts
   Future<void> _startLocationTracking() async {
-    // 1️⃣ Check GPS service
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+    // 1️⃣ GPS service check
+    if (!await Geolocator.isLocationServiceEnabled()) {
       _showError('Please enable location services');
       return;
     }
 
-    // 2️⃣ Permission handling
+    // 2️⃣ Permission
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -71,26 +74,22 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       return;
     }
 
-    // 3️⃣ Fast last-known location
+    // 3️⃣ Last known location (fast)
     final last = await Geolocator.getLastKnownPosition();
     if (last != null) {
-      setState(() {
-        latitude = last.latitude;
-        longitude = last.longitude;
-      });
+      latitude = last.latitude;
+      longitude = last.longitude;
     }
 
-    // 4️⃣ Accurate GPS
+    // 4️⃣ Accurate location
     final pos = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    setState(() {
-      latitude = pos.latitude;
-      longitude = pos.longitude;
-    });
+    latitude = pos.latitude;
+    longitude = pos.longitude;
 
-    // 🔥 Create SOS ONCE
+    // 🔥 CREATE SOS ONCE
     if (AppState.activeSosId == null) {
       AppState.activeSosId = await _sosService.startSOS(
         latitude: latitude!,
@@ -98,7 +97,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       );
     }
 
-    // 🚨 Send alerts ONCE
+    // 🚨 SEND ALERT ONCE
     if (!AppState.alertSent) {
       await _alertService.sendSOSAlert(
         latitude: latitude!,
@@ -107,12 +106,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       AppState.alertSent = true;
     }
 
-    // 🔄 Location updates
+    // 🔄 LIVE LOCATION UPDATES
     _locationTimer =
         Timer.periodic(const Duration(seconds: 5), (_) async {
           final p = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           );
+
+          if (!mounted) return;
 
           setState(() {
             latitude = p.latitude;
@@ -129,8 +130,33 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         });
   }
 
-  // 🛑 Stop emergency
+  // 🛑 STOP EMERGENCY (MANUAL)
   Future<void> _stopEmergency() async {
+    if (_sosEnded) return;
+    _sosEnded = true;
+
+    final sosId = AppState.activeSosId;
+    if (sosId != null) {
+      await _sosService.stopSOS(sosId);
+    }
+
+    _cleanupAndExit();
+  }
+
+  // 🔥 FAILSAFE: AUTO STOP IF SCREEN DISPOSED
+  @override
+  void dispose() {
+    if (!_sosEnded && AppState.activeSosId != null) {
+      _sosService.stopSOS(AppState.activeSosId!);
+    }
+
+    _uiTimer?.cancel();
+    _locationTimer?.cancel();
+    super.dispose();
+  }
+
+  // 🔄 RESET APP STATE
+  void _cleanupAndExit() {
     AppState.emergencyActive = false;
     AppState.alertSent = false;
     AppState.activeSosId = null;
@@ -150,13 +176,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
   String _format(int s) =>
       '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
-
-  @override
-  void dispose() {
-    _uiTimer?.cancel();
-    _locationTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,18 +206,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 10),
-
-          if (latitude != null && longitude != null)
-            Text(
-              'https://www.google.com/maps?q=$latitude,$longitude',
-              style: const TextStyle(color: Colors.blue),
-              textAlign: TextAlign.center,
-            ),
-
           const SizedBox(height: 25),
 
-          // 🚓 Police & 🏥 Hospital
           if (latitude != null && longitude != null)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -228,7 +237,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
           const SizedBox(height: 35),
 
-          // 🛑 STOP
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

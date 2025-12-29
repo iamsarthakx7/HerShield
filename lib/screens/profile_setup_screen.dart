@@ -1,0 +1,249 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ProfileSetupScreen extends StatefulWidget {
+  const ProfileSetupScreen({super.key});
+
+  @override
+  State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
+}
+
+class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
+  final _nameController = TextEditingController();
+  final _bloodController = TextEditingController();
+  final _noteController = TextEditingController();
+
+  final _contactNameController = TextEditingController();
+  final _contactPhoneController = TextEditingController();
+
+  bool _loading = false;
+  List<Map<String, String>> _contacts = [];
+
+  // ➕ ADD EMERGENCY CONTACT (MAX 5)
+  void _addContact() {
+    if (_contactNameController.text.trim().isEmpty ||
+        _contactPhoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter contact name and phone')),
+      );
+      return;
+    }
+
+    if (_contacts.length >= 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum 5 contacts allowed')),
+      );
+      return;
+    }
+
+    setState(() {
+      _contacts.add({
+        'name': _contactNameController.text.trim(),
+        'phone': _contactPhoneController.text.trim(),
+      });
+    });
+
+    _contactNameController.clear();
+    _contactPhoneController.clear();
+  }
+
+  // ❌ REMOVE CONTACT
+  void _removeContact(int index) {
+    setState(() => _contacts.removeAt(index));
+  }
+
+  // ✅ COMPLETE PROFILE
+  Future<void> _completeProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    if (_nameController.text.trim().isEmpty ||
+        _bloodController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill required fields')),
+      );
+      return;
+    }
+
+    if (_contacts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Add at least one emergency contact')),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    final userRef =
+    FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+    // 🔥 SAVE PROFILE
+    await userRef.set({
+      'name': _nameController.text.trim(),
+      'bloodGroup': _bloodController.text.trim(),
+      'emergencyNote': _noteController.text.trim(),
+      'profileCompleted': true,
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    // 🔥 SAVE CONTACTS
+    for (final contact in _contacts) {
+      await userRef.collection('contacts').add({
+        'name': contact['name'],
+        'phone': contact['phone'],
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+    setState(() => _loading = false);
+
+    // 🚀 GO TO HOME (CLEAR STACK)
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/',
+          (route) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Complete Your Profile'),
+        backgroundColor: Colors.red,
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This information is required for your safety',
+              style: TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 25),
+
+            // 👤 BASIC DETAILS
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Full Name *',
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: _bloodController,
+              decoration: const InputDecoration(
+                labelText: 'Blood Group *',
+                prefixIcon: Icon(Icons.bloodtype),
+                hintText: 'A+, B-, O+',
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: _noteController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Emergency Note (optional)',
+                prefixIcon: Icon(Icons.medical_information),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            const Divider(),
+
+            const SizedBox(height: 15),
+
+            // 👥 EMERGENCY CONTACTS
+            const Text(
+              'Emergency Contacts (1–5 required)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: _contactNameController,
+              decoration: const InputDecoration(
+                labelText: 'Contact Name',
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            TextField(
+              controller: _contactPhoneController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Contact Phone',
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            ElevatedButton.icon(
+              onPressed: _addContact,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Contact'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // 📋 CONTACT LIST
+            ..._contacts.asMap().entries.map((entry) {
+              final index = entry.key;
+              final contact = entry.value;
+
+              return ListTile(
+                leading: const Icon(Icons.person),
+                title: Text(contact['name']!),
+                subtitle: Text(contact['phone']!),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _removeContact(index),
+                ),
+              );
+            }),
+
+            const SizedBox(height: 30),
+
+            // ✅ COMPLETE
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _loading ? null : _completeProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: _loading
+                    ? const CircularProgressIndicator(
+                  color: Colors.white,
+                )
+                    : const Text(
+                  'Finish Setup',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
