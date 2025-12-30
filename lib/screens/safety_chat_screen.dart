@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../services/gemini_service.dart';
 import 'emergency_screen.dart';
 import '../constants/app_colors.dart';
@@ -28,6 +31,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
 
   bool _loading = false;
   bool _showEscalation = false;
+  String _emergencyAdvice = '';
 
   @override
   void initState() {
@@ -68,24 +72,6 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
     }
   }
 
-  bool _isDangerousMessage(String text) {
-    final dangerKeywords = [
-      'help',
-      'following me',
-      'chasing',
-      'threat',
-      'attack',
-      'alone',
-      'scared',
-      'someone behind',
-      'unsafe',
-      'panic',
-    ];
-
-    final lower = text.toLowerCase();
-    return dangerKeywords.any((k) => lower.contains(k));
-  }
-
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -98,6 +84,42 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
     });
   }
 
+  // ============================
+  // 🚨 OFFLINE EMERGENCY FALLBACK
+  // ============================
+  bool _fallbackDetectDanger(String text) {
+    final keywords = [
+      'help',
+      'scared',
+      'following',
+      'chasing',
+      'attack',
+      'threat',
+      'danger',
+      'panic',
+      'unsafe',
+      'alone',
+      'someone behind',
+    ];
+
+    final lower = text.toLowerCase();
+    return keywords.any((k) => lower.contains(k));
+  }
+
+  // ============================
+  // 📞 CALL EMERGENCY HELPER
+  // ============================
+  Future<void> _callEmergency(String number) async {
+    final Uri uri = Uri(scheme: 'tel', path: number);
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  // ============================
+  // 🚨 UPDATED SEND MESSAGE LOGIC
+  // ============================
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _loading) return;
@@ -105,13 +127,23 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
     setState(() {
       _messages.add(_ChatMessage(text: text, isUser: true));
       _loading = true;
-      _showEscalation = _isDangerousMessage(text);
+      _showEscalation = false;
+      _emergencyAdvice = '';
     });
 
     _controller.clear();
     _scrollToBottom();
 
     try {
+      // 1️⃣ AI SAFETY ANALYSIS
+      final analysis =
+      await _geminiService.analyzeSafetyMessage(text);
+
+      final String riskLevel = analysis['risk_level'] ?? 'low';
+      final bool recommendSos = analysis['recommend_sos'] ?? false;
+      final String advice = analysis['advice'] ?? '';
+
+      // 2️⃣ NORMAL ASSISTANT RESPONSE
       final reply = await _geminiService.sendMessage(
         systemPrompt: _systemPromptForMode(widget.mode),
         userMessage: text,
@@ -119,16 +151,30 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
 
       setState(() {
         _messages.add(_ChatMessage(text: reply, isUser: false));
+
+        if (riskLevel == 'high' && recommendSos) {
+          _showEscalation = true;
+          _emergencyAdvice = advice;
+        }
       });
     } catch (_) {
+      // 🔥 FALLBACK IF GEMINI FAILS
+      final bool fallbackDanger = _fallbackDetectDanger(text);
+
       setState(() {
         _messages.add(
           _ChatMessage(
             text:
-            'I’m here with you. Something went wrong. Please check your connection and try again.',
+            'I’m here with you. If you feel unsafe, help is available.',
             isUser: false,
           ),
         );
+
+        if (fallbackDanger) {
+          _showEscalation = true;
+          _emergencyAdvice =
+          'If you are in immediate danger, call emergency number 112.';
+        }
       });
     } finally {
       setState(() => _loading = false);
@@ -188,6 +234,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
               ),
             ),
 
+          // 🚨 SOS + CALL UI
           if (_showEscalation)
             Container(
               margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
@@ -200,20 +247,21 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
               child: Column(
                 children: [
                   const Text(
-                    'This sounds serious.',
+                    '⚠️ Possible Danger Detected',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.emergency,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Do you want to start SOS so your contacts can help?',
-                    textAlign: TextAlign.center,
-                  ),
+                  if (_emergencyAdvice.isNotEmpty)
+                    Text(
+                      _emergencyAdvice,
+                      textAlign: TextAlign.center,
+                    ),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  Wrap(
+                    spacing: 10,
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -228,6 +276,14 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                           );
                         },
                         child: const Text('START SOS'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => _callEmergency('112'),
+                        child: const Text('CALL 112'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => _callEmergency('181'),
+                        child: const Text('CALL 181'),
                       ),
                       TextButton(
                         onPressed: () {

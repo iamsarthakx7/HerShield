@@ -67,21 +67,42 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+
+      // 🧭 APP BAR (CLEAN & MODERN)
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
         title: const Text(
           'HerShield',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        centerTitle: true,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
+
       body: Column(
         children: [
           const SizedBox(height: 20),
 
-          // 🧠 SAFETY ASSISTANT
+          // 🧠 SAFETY ASSISTANT SECTION
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -90,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Text(
                   'Safety Assistant',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -101,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
 
                 _assistantButton(
                   text: 'I feel unsafe',
@@ -133,12 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const Spacer(),
 
-          // 🚨 SOS BUTTON
+          // 🚨 SOS BUTTON (HERO ACTION)
           GestureDetector(
             onTap: AppState.emergencyActive ? null : _triggerSOS,
             child: Container(
-              height: 220,
-              width: 220,
+              height: 230,
+              width: 230,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
@@ -151,21 +172,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.45),
+                    color: AppColors.emergency.withOpacity(0.45),
                     blurRadius: 30,
                     spreadRadius: 8,
                   ),
                 ],
               ),
               child: const Center(
-                child: Text(
-                  'SOS',
-                  style: TextStyle(
-                    fontSize: 46,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'SOS',
+                      style: TextStyle(
+                        fontSize: 44,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -182,64 +214,44 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           const SizedBox(height: 30),
-
-          // ⚙️ SETTINGS
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
-            },
-            child: Text(
-              'Settings',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  // 🔘 Assistant Button
+  // 🔘 Assistant Button (POLISHED)
   Widget _assistantButton({
     required String text,
     required IconData icon,
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(
-              vertical: 14, horizontal: 14),
+              vertical: 16, horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 8,
               ),
             ],
           ),
           child: Row(
             children: [
               Icon(icon, color: AppColors.primary),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Text(
                 text,
                 style: const TextStyle(
                   fontSize: 15,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
