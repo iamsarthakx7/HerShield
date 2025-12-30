@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../constants/app_colors.dart';
 import 'profile_screen.dart';
 import 'contacts_screen.dart';
 import 'sos_history_screen.dart';
@@ -23,7 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadPermissionStatus();
   }
 
-  /// 🔍 Load permission status
+  // 🔍 Load permission status
   Future<void> _loadPermissionStatus() async {
     final location = await Permission.location.status;
     final notification = await Permission.notification.status;
@@ -34,17 +35,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  /// ⚙️ Open system app settings
+  // ⚙️ Open system settings
   Future<void> _openAppSettings() async {
     await openAppSettings();
   }
 
-  /// 🔓 Logout
+  // 🔓 Logout
   Future<void> _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } catch (_) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Logout failed')),
       );
@@ -54,10 +55,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -65,7 +66,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 10),
           children: [
-            // 👤 ACCOUNT
             _sectionTitle('Account'),
 
             _settingsTile(
@@ -96,13 +96,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
 
-            // 🚨 EMERGENCY
             _sectionTitle('Emergency'),
 
             _settingsTile(
               icon: Icons.contacts,
               title: 'Emergency Contacts',
-              subtitle: 'Manage trusted contacts (up to 5)',
+              subtitle: 'Manage trusted contacts',
               onTap: () {
                 Navigator.push(
                   context,
@@ -120,7 +119,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: _openAppSettings,
             ),
 
-            // ⚙️ APP
             _sectionTitle('App'),
 
             _permissionTile(
@@ -132,7 +130,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 20),
 
-            // 🔓 LOGOUT
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
@@ -140,11 +137,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
+                  leading:
+                  const Icon(Icons.logout, color: AppColors.emergency),
                   title: const Text(
                     'Logout',
                     style: TextStyle(
-                      color: Colors.red,
+                      color: AppColors.emergency,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -160,7 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 🧱 SECTION TITLE
+  // 🔹 Section title
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
@@ -169,14 +167,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey.shade600,
+          color: AppColors.textSecondary,
           letterSpacing: 1,
         ),
       ),
     );
   }
 
-  // 🧩 NORMAL TILE
+  // 🔹 Normal tile
   Widget _settingsTile({
     required IconData icon,
     required String title,
@@ -192,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 🔐 PERMISSION TILE
+  // 🔹 Permission tile
   Widget _permissionTile({
     required IconData icon,
     required String title,
@@ -206,13 +204,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: allowed ? Colors.green.shade100 : Colors.red.shade100,
+          color: allowed
+              ? Colors.green.shade100
+              : AppColors.emergency.withOpacity(0.15),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           allowed ? 'Allowed' : 'Denied',
           style: TextStyle(
-            color: allowed ? Colors.green : Colors.red,
+            color: allowed ? Colors.green : AppColors.emergency,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
@@ -222,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 🔧 BASE TILE
+  // 🔹 Base tile
   Widget _baseTile({
     required IconData icon,
     required String title,
@@ -238,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           borderRadius: BorderRadius.circular(14),
         ),
         child: ListTile(
-          leading: Icon(icon, color: Colors.red),
+          leading: Icon(icon, color: AppColors.primary),
           title: Text(
             title,
             style: const TextStyle(fontWeight: FontWeight.w600),
