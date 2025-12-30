@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../constants/app_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String currentName;
@@ -31,10 +32,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
 
-    _nameController =
-        TextEditingController(text: widget.currentName);
-    _emailController =
-        TextEditingController(text: widget.currentEmail);
+    _nameController = TextEditingController(text: widget.currentName);
+    _emailController = TextEditingController(text: widget.currentEmail);
     _phoneController = TextEditingController();
   }
 
@@ -65,7 +64,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       String? photoUrl;
 
-      // 📸 Upload photo if changed
       if (_image != null) {
         final ref = FirebaseStorage.instance
             .ref('profile_photos/${user.uid}.jpg');
@@ -74,7 +72,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         photoUrl = await ref.getDownloadURL();
       }
 
-      // 🔥 Update Firestore profile
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -86,7 +83,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // ✉️ Update email (Auth)
       if (_emailController.text.trim() != widget.currentEmail) {
         await user.updateEmail(_emailController.text.trim());
       }
@@ -104,27 +100,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 👤 Profile Image
             GestureDetector(
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 55,
-                backgroundColor: Colors.red.shade100,
+                backgroundColor: AppColors.secondary,
                 backgroundImage:
                 _image != null ? FileImage(_image!) : null,
                 child: _image == null
                     ? const Icon(
                   Icons.camera_alt,
                   size: 30,
-                  color: Colors.red,
+                  color: AppColors.primary,
                 )
                     : null,
               ),
@@ -132,7 +128,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const SizedBox(height: 25),
 
-            // 🧍 Name
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -143,7 +138,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const SizedBox(height: 15),
 
-            // 📞 Emergency Phone
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
@@ -155,7 +149,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const SizedBox(height: 15),
 
-            // ✉️ Email
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -166,19 +159,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const SizedBox(height: 30),
 
-            // 💾 Save Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _loading ? null : _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _loading
                     ? const CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.white,
                 )
                     : const Text('Save Profile'),
               ),

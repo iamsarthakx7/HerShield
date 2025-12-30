@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/gemini_service.dart';
 import 'emergency_screen.dart';
+import '../constants/app_colors.dart';
 
 enum SafetyChatMode {
   unsafe,
@@ -138,10 +139,10 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(_titleForMode(widget.mode)),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
         centerTitle: true,
       ),
       body: Column(
@@ -150,7 +151,10 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
             padding: EdgeInsets.only(top: 8),
             child: Text(
               'You’re not alone. HerShield is here to help.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           Expanded(
@@ -159,8 +163,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
-                final msg = _messages[index];
-                return _ChatBubble(message: msg);
+                return _ChatBubble(message: _messages[index]);
               },
             ),
           ),
@@ -177,7 +180,10 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                   SizedBox(width: 8),
-                  Text('HerShield is responding…'),
+                  Text(
+                    'HerShield is responding…',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                 ],
               ),
             ),
@@ -187,9 +193,9 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
               margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: AppColors.emergency.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.red),
+                border: Border.all(color: AppColors.emergency),
               ),
               child: Column(
                 children: [
@@ -197,7 +203,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                     'This sounds serious.',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: AppColors.emergency,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -211,7 +217,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppColors.emergency,
                         ),
                         onPressed: () {
                           Navigator.pushReplacement(
@@ -227,7 +233,10 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                         onPressed: () {
                           setState(() => _showEscalation = false);
                         },
-                        child: const Text('I’m OK'),
+                        child: const Text(
+                          'I’m OK',
+                          style: TextStyle(color: AppColors.primary),
+                        ),
                       ),
                     ],
                   ),
@@ -246,7 +255,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                     decoration: InputDecoration(
                       hintText: 'Type your message…',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.inputFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
@@ -256,7 +265,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.red),
+                  icon: const Icon(Icons.send, color: AppColors.primary),
                   onPressed: _loading ? null : _sendMessage,
                 ),
               ],
@@ -302,7 +311,10 @@ class _ChatBubble extends StatelessWidget {
               padding: EdgeInsets.only(left: 6, bottom: 2),
               child: Text(
                 'HerShield',
-                style: TextStyle(fontSize: 11, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           Container(
@@ -312,7 +324,9 @@ class _ChatBubble extends StatelessWidget {
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
             decoration: BoxDecoration(
-              color: message.isUser ? Colors.red : Colors.white,
+              color: message.isUser
+                  ? AppColors.primary
+                  : AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -324,7 +338,9 @@ class _ChatBubble extends StatelessWidget {
             child: Text(
               message.text,
               style: TextStyle(
-                color: message.isUser ? Colors.white : Colors.black87,
+                color: message.isUser
+                    ? AppColors.white
+                    : AppColors.textPrimary,
                 fontSize: 15,
               ),
             ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../constants/app_colors.dart';
 import '../services/sos_service.dart';
 
 class SOSHistoryScreen extends StatelessWidget {
@@ -12,7 +12,7 @@ class SOSHistoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SOS History'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(

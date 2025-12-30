@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../constants/app_colors.dart';
 
 class EmergencyInfoScreen extends StatefulWidget {
   const EmergencyInfoScreen({super.key});
@@ -69,7 +70,7 @@ class _EmergencyInfoScreenState extends State<EmergencyInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Emergency Info'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary, // CHANGED
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -89,7 +90,7 @@ class _EmergencyInfoScreenState extends State<EmergencyInfoScreen> {
               child: ElevatedButton(
                 onPressed: _saveData,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.primary, // CHANGED
                   padding:
                   const EdgeInsets.symmetric(vertical: 14),
                 ),

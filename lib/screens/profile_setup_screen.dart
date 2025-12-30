@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../constants/app_colors.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -20,7 +21,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   bool _loading = false;
   List<Map<String, String>> _contacts = [];
 
-  // ➕ ADD EMERGENCY CONTACT (MAX 5)
   void _addContact() {
     if (_contactNameController.text.trim().isEmpty ||
         _contactPhoneController.text.trim().isEmpty) {
@@ -48,12 +48,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     _contactPhoneController.clear();
   }
 
-  // ❌ REMOVE CONTACT
   void _removeContact(int index) {
     setState(() => _contacts.removeAt(index));
   }
 
-  // ✅ COMPLETE PROFILE
   Future<void> _completeProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -69,7 +67,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     if (_contacts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Add at least one emergency contact')),
+          content: Text('Add at least one emergency contact'),
+        ),
       );
       return;
     }
@@ -79,7 +78,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final userRef =
     FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-    // 🔥 SAVE PROFILE
     await userRef.set({
       'name': _nameController.text.trim(),
       'bloodGroup': _bloodController.text.trim(),
@@ -88,7 +86,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    // 🔥 SAVE CONTACTS
     for (final contact in _contacts) {
       await userRef.collection('contacts').add({
         'name': contact['name'],
@@ -99,7 +96,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
     setState(() => _loading = false);
 
-    // 🚀 GO TO HOME (CLEAR STACK)
     Navigator.of(context).pushNamedAndRemoveUntil(
       '/',
           (route) => false,
@@ -109,9 +105,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Complete Your Profile'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -121,12 +118,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           children: [
             const Text(
               'This information is required for your safety',
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
             ),
 
             const SizedBox(height: 25),
 
-            // 👤 BASIC DETAILS
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -163,12 +162,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
             const SizedBox(height: 15),
 
-            // 👥 EMERGENCY CONTACTS
             const Text(
               'Emergency Contacts (1–5 required)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
 
@@ -198,23 +197,28 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               icon: const Icon(Icons.add),
               label: const Text('Add Contact'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.primary,
               ),
             ),
 
             const SizedBox(height: 15),
 
-            // 📋 CONTACT LIST
             ..._contacts.asMap().entries.map((entry) {
               final index = entry.key;
               final contact = entry.value;
 
               return ListTile(
-                leading: const Icon(Icons.person),
+                leading: const Icon(
+                  Icons.person,
+                  color: AppColors.primary,
+                ),
                 title: Text(contact['name']!),
                 subtitle: Text(contact['phone']!),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(
+                    Icons.delete,
+                    color: AppColors.emergency,
+                  ),
                   onPressed: () => _removeContact(index),
                 ),
               );
@@ -222,18 +226,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
             const SizedBox(height: 30),
 
-            // ✅ COMPLETE
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _loading ? null : _completeProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _loading
                     ? const CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.white,
                 )
                     : const Text(
                   'Finish Setup',
