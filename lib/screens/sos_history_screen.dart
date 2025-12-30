@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../constants/app_colors.dart';
 import '../services/sos_service.dart';
 
@@ -10,6 +11,7 @@ class SOSHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('SOS History'),
         backgroundColor: AppColors.primary,
@@ -23,12 +25,7 @@ class SOSHistoryScreen extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'No SOS history found',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
+            return const _EmptyState();
           }
 
           final docs = snapshot.data!.docs;
@@ -47,11 +44,18 @@ class SOSHistoryScreen extends StatelessWidget {
               final Timestamp? endedAt =
               data['endedAt'] as Timestamp?;
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +64,7 @@ class SOSHistoryScreen extends StatelessWidget {
                     if (lat != null && lng != null)
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16),
+                          top: Radius.circular(18),
                         ),
                         child: Image.network(
                           staticMapUrl(lat, lng),
@@ -71,7 +75,7 @@ class SOSHistoryScreen extends StatelessWidget {
                             height: 180,
                             color: Colors.grey.shade200,
                             child: const Center(
-                              child: Icon(Icons.map, size: 40),
+                              child: Icon(Icons.map, size: 42),
                             ),
                           ),
                         ),
@@ -82,25 +86,34 @@ class SOSHistoryScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '🚨 SOS Emergency',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          // HEADER ROW
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                '🚨 SOS Emergency',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              _StatusBadge(),
+                            ],
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
 
                           if (endedAt != null)
                             Text(
-                              'Ended on: ${_formatDate(endedAt)}',
+                              _prettyDate(endedAt),
                               style: TextStyle(
                                 color: Colors.grey.shade700,
+                                fontSize: 13,
                               ),
                             ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
 
                           if (lat != null && lng != null)
                             Align(
@@ -152,12 +165,77 @@ class SOSHistoryScreen extends StatelessWidget {
   }
 
   // ===============================
-  // 🕒 DATE FORMAT (NO intl needed)
+  // 🕒 FRIENDLY DATE
   // ===============================
-  String _formatDate(Timestamp timestamp) {
+  String _prettyDate(Timestamp timestamp) {
     final dt = timestamp.toDate();
-    return '${dt.day}/${dt.month}/${dt.year} • '
-        '${dt.hour.toString().padLeft(2, '0')}:'
+    final now = DateTime.now();
+
+    final diff = now.difference(dt).inDays;
+
+    if (diff == 0) {
+      return 'Today • ${_time(dt)}';
+    } else if (diff == 1) {
+      return 'Yesterday • ${_time(dt)}';
+    } else {
+      return '${dt.day}/${dt.month}/${dt.year} • ${_time(dt)}';
+    }
+  }
+
+  String _time(DateTime dt) {
+    return '${dt.hour.toString().padLeft(2, '0')}:'
         '${dt.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+// ===============================
+// 🟢 STATUS BADGE
+// ===============================
+class _StatusBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green),
+      ),
+      child: const Text(
+        'ENDED',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+// ===============================
+// 📦 EMPTY STATE
+// ===============================
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.history, size: 60, color: Colors.grey),
+          SizedBox(height: 14),
+          Text(
+            'No SOS history yet',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
   }
 }
