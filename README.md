@@ -2,147 +2,212 @@
 
 ### **A Real-Time Emergency Response & AI-Driven Safety Companion**
 
-HerShield is a **Flutter + Firebase** powered mobile application designed to provide immediate emergency assistance, intelligent safety guidance, and discreet protection features in unsafe situations. Built as a hackathon submission, it focuses on real-world usability, offline resilience, and rapid response.
+HerShield is a **Flutter + Firebase powered women safety mobile application** designed to provide **instant emergency assistance**, **AI-driven safety guidance**, and **stealth protection features** during dangerous situations.
+
+Built as a **hackathon project**, HerShield focuses on **real-world emergency behavior**, **offline resilience**, and **fast, reliable response when every second matters**.
 
 ---
 
-## 🚀 **The Problem**
-Women often face unsafe situations where:
-- Quick help is inaccessible
-- Panic leads to unclear decisions
-- Internet is unavailable
-- Using an obvious safety app could escalate danger
+## 🚀 **Problem Statement**
 
-**HerShield solves this** by integrating:
-- One-tap SOS with live location
-- AI-powered risk detection & guidance
-- Stealth emergency mode
-- Offline SMS fallback
+Women often face unsafe situations where:
+
+* Immediate help is difficult to access
+* Panic makes decision-making hard
+* Internet connectivity may be unavailable
+* Using an obvious safety app could escalate the threat
+
+### **HerShield solves this by combining:**
+
+* One-tap SOS with live location sharing
+* AI-powered safety assistant that listens and analyzes
+* Multi-channel emergency alerts (SMS + WhatsApp)
+* Stealth emergency mode (calculator disguise)
 
 ---
 
 ## ✨ **Key Features**
 
-### 🧠 **AI Safety Assistant (Powered by Gemini)**
-An intelligent chat-based assistant that:
-- Analyzes user messages in real-time for risk
-- Classifies danger level (Low/Medium/High)
-- Suggests SOS activation when high risk is detected
-- Displays emergency contacts (Police: 112, Ambulance: 108)
-- Supports contextual modes:
-  - **Unsafe** – Immediate danger
-  - **Panic** – High anxiety situations
-  - **Confused** – Need clarity
-  - **General** – Safety advice
+---
+
+### 🧠 **AI Safety Assistant (Gemini-Powered)**
+
+HerShield includes an intelligent **AI safety assistant** that supports users **before and during emergencies**.
+
+* Chat-based interface where users describe their situation naturally
+* AI **listens and analyzes messages in real time**
+* Automatically detects **risk level** (Low / Medium / High)
+* **Suggests activating SOS** when high-risk intent is detected
+* Shows **India-specific emergency numbers**:
+
+  * Police – **112**
+  * Ambulance – **108**
+* Users can **directly call emergency services from the chat screen**
+* Context-aware modes:
+
+  * **Unsafe** – Immediate danger
+  * **Panic** – High anxiety situations
+  * **Confused** – Need clarity
+  * **General** – Safety guidance
+
+> This ensures help is suggested **even before the user manually presses SOS**.
+
+---
 
 ### 🚨 **Emergency SOS System**
-- **One-tap activation** or **shake-to-trigger**
-- **Live GPS tracking** with continuous updates
-- Alerts sent to trusted contacts via **SMS (works offline)**
-- SOS data stored securely in Firebase
+
+* **One-tap SOS activation** from home screen
+* **Shake-to-trigger SOS** for hands-free emergencies
+* Automatic **live GPS location tracking**
+* SOS lifecycle (start / update / stop) managed securely using Firebase
+* Emergency alerts sent to trusted contacts via:
+
+  * 📩 **SMS (works without internet)**
+  * 💬 **WhatsApp (when internet is available)**
+
+This guarantees alerts reach contacts even in poor network conditions.
+
+---
+
+### 📶 **Multi-Channel Alert Delivery (SMS + WhatsApp)**
+
+HerShield avoids single-point failure by using **multiple communication channels**:
+
+* **SMS fallback** when mobile data or Wi-Fi is unavailable
+* **WhatsApp alerts** when internet is available for faster and richer communication
+* Ensures maximum reach during emergencies
+
+---
 
 ### 📍 **Live Location & Emergency Actions**
-- **Real-time location sharing** (only during SOS)
-- **Direct emergency calls** to police (112) & ambulance (108)
-- **Maps integration** for nearby police stations & hospitals
-- **Offline map support** using cached GPS data
 
-### 🕶️ **Stealth / Hide Mode**
-- **Instant disguise** as a fully functional calculator
-- SOS continues running in background
-- **Long-press "="** to return to emergency screen
-- Protects users when visible apps could increase risk
+* **Continuous live location sharing** during SOS
+* Location updates every few seconds
+* Location shared **only while SOS is active**
+* **Direct calling buttons**:
 
-### 📶 **Offline Resilience**
-- **SMS-based alert fallback** when internet fails
-- **Location caching** for poor connectivity areas
-- **Emergency actions accessible** without network
+  * Call Police – **112**
+  * Call Ambulance – **108**
+* Open **Nearby Police Stations** and **Nearby Hospitals** in Maps
+
+> Even without internet, maps may still open using **offline maps + GPS caching**.
+
+---
+
+### 🕶️ **Stealth / Hide Mode (Calculator Disguise)**
+
+* Emergency screen can be **instantly hidden**
+* Screen disguises itself as a **realistic calculator**
+* SOS continues running silently in the background
+* **Long-press `=`** to return to emergency screen
+
+This protects users when visibly using a safety app could increase danger.
+
+---
+
+### 📳 **Shake-to-Trigger SOS**
+
+* Shake phone to activate SOS discreetly
+* Useful when user cannot unlock phone or navigate UI
+* Works even under panic situations
 
 ---
 
 ## 🛠️ **Tech Stack**
 
-| **Layer**     | **Technology**          |
-|---------------|-------------------------|
-| **Frontend**  | Flutter (Dart)          |
-| **Backend**   | Firebase                |
-| **Auth**      | Firebase Authentication |
-| **Database**  | Cloud Firestore         |
-| **Storage**   | Firebase Storage        |
-| **Location**  | Geolocator              |
-| **AI**        | Google Gemini API       |
-| **Maps**      | Google Maps API         |
-| **Utilities** | url_launcher, SMS       |
+| Layer          | Technology        |
+| -------------- | ----------------- |
+| Frontend       | Flutter (Dart)    |
+| Backend        | Firebase          |
+| Authentication | Firebase Auth     |
+| Database       | Cloud Firestore   |
+| Storage        | Firebase Storage  |
+| Location       | Geolocator        |
+| AI             | Google Gemini API |
+| Maps           | Google Maps       |
+| Alerts         | SMS + WhatsApp    |
+| Utilities      | url_launcher      |
 
 ---
 
 ## 📱 **App Screens**
-- **Home Screen** – SOS button + AI Assistant access
-- **Safety Chat Screen** – Interactive AI guidance
-- **Emergency Screen** – Live SOS controls & location
-- **Stealth Calculator** – Disguised emergency interface
-- **Profile & Contacts** – Manage trusted contacts
-- **SOS History** – View past emergencies
-- **Settings** – Configure preferences & permissions
+
+* Home Screen (SOS + AI Assistant access)
+* Safety Chat Screen (AI Safety Assistant)
+* Emergency Screen (Live SOS + Actions)
+* Stealth Calculator Screen
+* Profile & Emergency Contacts
+* SOS History
+* Settings
 
 ---
 
-## 🔐 **Privacy & Safety**
-- **Minimal permissions** – Only what’s necessary
-- **Location shared only during active SOS**
-- **No data retention** beyond emergency periods
-- **Encrypted communications**
-- *API keys used for demo purposes only*
+## 🔐 **Privacy & Safety Considerations**
+
+* Minimal permissions – only what is required
+* Location shared **only during active SOS**
+* SOS runs silently in stealth mode
+* No unnecessary data retention
+* SMS ensures emergency alerts work without internet
+
+> API keys are used only for hackathon/demo purposes.
 
 ---
 
 ## 🧪 **Demo Flow (For Judges)**
-1. **Launch app** → Home Screen
-2. **Open AI Assistant** → Type: *"Someone is following me"*
-3. **AI detects risk** → Suggests SOS + shows emergency numbers
-4. **Activate SOS** → Emergency screen launches
-5. **Live location** begins sharing with contacts
-6. **Hide screen** → Switches to calculator disguise
-7. **Long-press "="** → Returns to emergency screen
-8. **Enable Airplane Mode** → Demonstrates SMS fallback
-9. **Stop SOS** → Ends emergency session
+
+1. Launch app → Home Screen
+2. Open **AI Safety Assistant**
+3. Type: *“Someone is following me”*
+4. AI analyzes message and **suggests SOS + emergency numbers**
+5. User can **call police directly from chat**
+6. Activate SOS
+7. Emergency screen appears → live location sharing starts
+8. Alerts sent via **WhatsApp + SMS fallback**
+9. Hide screen → Calculator disguise
+10. Long-press `=` → Return to emergency screen
+11. Enable airplane mode → Demonstrate **offline SMS fallback**
 
 ---
 
 ## 🏆 **Why HerShield Stands Out**
-✅ **Proactive AI Guidance** – Intervenes before escalation  
-✅ **Real-World Reliability** – Works offline via SMS fallback  
-✅ **Discreet Protection** – Calculator disguise for stealth safety  
-✅ **Intuitive UX** – Designed for panic situations  
-✅ **Scalable Architecture** – Ready for production deployment  
+
+✅ **AI that listens, understands, and suggests action**
+✅ **Multi-channel alerts (SMS + WhatsApp)**
+✅ **Offline-first emergency design**
+✅ **Stealth protection for real-world threats**
+✅ **UX designed for panic situations, not normal usage**
 
 ---
 
 ## 👥 **Team**
-- Sarthak Deore
-- Apurva Deshpande  
-- Shreya Gaykar
-- Esha Patil
+
+* **Sarthak Deore**
+* **Apurva Deshpande**
+* **Shreya Gaykar**
+* **Esha Patil**
 
 ---
 
 ## 📌 **Future Roadmap**
-- **Predictive Threat Analysis** – ML models using location/time patterns
-- **Blockchain Incident Logs** – Tamper-proof evidence for legal use
-- **Mesh Network SOS** – Bluetooth/Wi-Fi Direct during network outages
-- **Satellite SOS Integration** – Remote area emergency coverage
-- **IoT Safety Protocol** – Smart home/vehicle integration
-- **Law Enforcement Dashboard** – Real-time emergency analytics
+
+* **Predictive Threat Analysis** using AI & crime data
+* **Blockchain-secured incident logs** for legal evidence
+* **Mesh network SOS** using Bluetooth / Wi-Fi Direct
+* **Satellite SOS integration** for remote areas
+* **IoT safety protocols** with smart homes & vehicles
+* **Law enforcement dashboard** for real-time monitoring
 
 ---
 
 ## ✅ **Hackathon Ready**
-- **Fully functional prototype** with core features
-- **Real-world testing** of emergency scenarios
-- **Clear problem-solution alignment**
-- **Production-grade code structure**
-- **Demo-ready with judge-friendly flow**
+
+* Fully functional prototype
+* Real-world emergency features
+* AI-driven decision support
+* Offline + online reliability
+* Clear problem → solution → demo flow
 
 ---
 
-### **HerShield isn’t just an app—it’s an intelligent safety companion that listens, understands, and acts when every second counts.**
+### **HerShield is not just an app — it is an intelligent safety companion that listens, analyzes, and acts when every second counts.**
