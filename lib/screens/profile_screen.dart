@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'edit_profile_screen.dart';
 import 'sos_history_screen.dart';
+import '../constants/app_colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -22,7 +23,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.primary,
         centerTitle: true,
         actions: [
           IconButton(
@@ -67,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(30),
                       bottomRight: Radius.circular(30),
@@ -84,7 +85,7 @@ class ProfileScreen extends StatelessWidget {
                             ? const Icon(
                           Icons.person,
                           size: 60,
-                          color: Colors.red,
+                          color: AppColors.primary,
                         )
                             : null,
                       ),
@@ -135,7 +136,7 @@ class ProfileScreen extends StatelessWidget {
                       icon: const Icon(Icons.edit),
                       label: const Text('Edit Profile'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -179,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
-          leading: Icon(icon, color: Colors.red),
+          leading: Icon(icon, color: AppColors.primary),
           title: Text(
             title,
             style: const TextStyle(
