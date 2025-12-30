@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/gemini_service.dart';
 import 'emergency_screen.dart';
-import '../constants/app_colors.dart';
 
 enum SafetyChatMode {
   unsafe,
@@ -42,19 +41,20 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
         isUser: false,
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
 
   String _initialMessageForMode(SafetyChatMode mode) {
     switch (mode) {
       case SafetyChatMode.unsafe:
-        return 'I’m here with you. You’re safe right now. Tell me what’s making you feel unsafe.';
+        return 'I\'m here with you. You\'re safe right now. Tell me what\'s making you feel unsafe.';
       case SafetyChatMode.panic:
-        return 'Let’s slow things down together. Take a deep breath. I’m listening.';
+        return 'Let\'s slow things down together. Take a deep breath. I\'m listening.';
       case SafetyChatMode.confused:
-        return 'It’s okay to feel confused. Tell me what’s going on.';
+        return 'It\'s okay to feel confused. Tell me what\'s going on.';
       case SafetyChatMode.general:
       default:
-        return 'Hi, I’m your safety assistant. How can I help you?';
+        return 'Hi, I\'m your safety assistant. How can I help you?';
     }
   }
 
@@ -165,7 +165,7 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
         _messages.add(
           _ChatMessage(
             text:
-            'I’m here with you. If you feel unsafe, help is available.',
+            'I\'m here with you. If you feel unsafe, help is available.',
             isUser: false,
           ),
         );
@@ -185,87 +185,240 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text(_titleForMode(widget.mode)),
-        backgroundColor: AppColors.primary,
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'You’re not alone. HerShield is here to help.',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
+        title: Text(
+          _titleForMode(widget.mode),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            letterSpacing: -0.5,
           ),
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _ChatBubble(message: _messages[index]);
+        ),
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 1,
+        foregroundColor: const Color(0xFF1E293B),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.help_outline_rounded,
+                size: 22,
+              ),
+              color: const Color(0xFF475569),
+              onPressed: () {
+                // Optional: Add help dialog
               },
             ),
           ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Safety Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF6366F1).withOpacity(0.08),
+                  const Color(0xFF8B5CF6).withOpacity(0.04),
+                ],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: const Color(0xFFE2E8F0),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _iconForMode(widget.mode),
+                    color: const Color(0xFF6366F1),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _subtitleForMode(widget.mode),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'You\'re not alone. HerShield is here to help.',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
 
+          // Chat Messages
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF8FAFC),
+                    Color(0xFFF1F5F9),
+                  ],
+                ),
+              ),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(20),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  return _ChatBubble(message: _messages[index]);
+                },
+              ),
+            ),
+          ),
+
+          // Loading Indicator
           if (_loading)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: const Color(0xFF6366F1),
+                    ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Text(
-                    'HerShield is responding…',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    'HerShield is responding...',
+                    style: TextStyle(
+                      color: const Color(0xFF475569),
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
 
-          // 🚨 SOS + CALL UI
+          // 🚨 EMERGENCY ESCALATION CARD
           if (_showEscalation)
             Container(
-              margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-              padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.emergency.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.emergency),
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: const Color(0xFFFECACA),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFEF4444).withOpacity(0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  const Text(
-                    '⚠️ Possible Danger Detected',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.emergency,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEF4444).withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Color(0xFFEF4444),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Safety Alert',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Color(0xFFDC2626),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 12),
                   if (_emergencyAdvice.isNotEmpty)
-                    Text(
-                      _emergencyAdvice,
-                      textAlign: TextAlign.center,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        _emergencyAdvice,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF991B1B),
+                          height: 1.4,
+                        ),
+                      ),
                     ),
-                  const SizedBox(height: 10),
                   Wrap(
                     spacing: 10,
+                    runSpacing: 10,
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.emergency,
+                          backgroundColor: const Color(0xFFEF4444),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushReplacement(
@@ -275,23 +428,74 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
                             ),
                           );
                         },
-                        child: const Text('START SOS'),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.warning_rounded, size: 18),
+                            SizedBox(width: 6),
+                            Text(
+                              'START SOS',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: const Color(0xFFEF4444)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
                         onPressed: () => _callEmergency('112'),
-                        child: const Text('CALL 112'),
+                        child: Text(
+                          'CALL 112',
+                          style: TextStyle(
+                            color: const Color(0xFFEF4444),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                       OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: const Color(0xFF6366F1)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
                         onPressed: () => _callEmergency('181'),
-                        child: const Text('CALL 181'),
+                        child: Text(
+                          'WOMEN HELPLINE',
+                          style: TextStyle(
+                            color: const Color(0xFF6366F1),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
                           setState(() => _showEscalation = false);
                         },
-                        child: const Text(
-                          'I’m OK',
-                          style: TextStyle(color: AppColors.primary),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 14),
+                        ),
+                        child: Text(
+                          'I\'M OK',
+                          style: TextStyle(
+                            color: const Color(0xFF16A34A),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -300,29 +504,61 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
               ),
             ),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          // Message Input
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: const Color(0xFFE2E8F0),
+                  width: 1,
+                ),
+              ),
+            ),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    enabled: !_loading,
-                    decoration: InputDecoration(
-                      hintText: 'Type your message…',
-                      filled: true,
-                      fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      enabled: !_loading,
+                      maxLines: 4,
+                      minLines: 1,
+                      style: const TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Type your message here...',
+                        hintStyle: TextStyle(
+                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w400,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        border: InputBorder.none,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.send_rounded,
+                            color: const Color(0xFF6366F1),
+                            size: 22,
+                          ),
+                          onPressed: _loading ? null : _sendMessage,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send, color: AppColors.primary),
-                  onPressed: _loading ? null : _sendMessage,
                 ),
               ],
             ),
@@ -339,10 +575,38 @@ class _SafetyChatScreenState extends State<SafetyChatScreen> {
       case SafetyChatMode.unsafe:
         return 'Safety Support';
       case SafetyChatMode.confused:
-        return 'Guided Help';
+        return 'Guidance';
       case SafetyChatMode.general:
       default:
         return 'Safety Assistant';
+    }
+  }
+
+  String _subtitleForMode(SafetyChatMode mode) {
+    switch (mode) {
+      case SafetyChatMode.panic:
+        return 'Breathing support & calming guidance';
+      case SafetyChatMode.unsafe:
+        return 'Practical safety advice & support';
+      case SafetyChatMode.confused:
+        return 'Clear thinking & decision support';
+      case SafetyChatMode.general:
+      default:
+        return 'Your personal safety assistant';
+    }
+  }
+
+  IconData _iconForMode(SafetyChatMode mode) {
+    switch (mode) {
+      case SafetyChatMode.panic:
+        return Icons.favorite_border_rounded;
+      case SafetyChatMode.unsafe:
+        return Icons.warning_amber_rounded;
+      case SafetyChatMode.confused:
+        return Icons.help_outline_rounded;
+      case SafetyChatMode.general:
+      default:
+        return Icons.chat_bubble_outline_rounded;
     }
   }
 }
@@ -357,51 +621,86 @@ class _ChatBubble extends StatelessWidget {
     return Align(
       alignment:
       message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: message.isUser
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          if (!message.isUser)
-            const Padding(
-              padding: EdgeInsets.only(left: 6, bottom: 2),
-              child: Text(
-                'HerShield',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: message.isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            if (!message.isUser)
+              Container(
+                margin: const EdgeInsets.only(left: 8, bottom: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Text(
+                      'HerShield',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            padding: const EdgeInsets.all(14),
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            decoration: BoxDecoration(
-              color: message.isUser
-                  ? AppColors.primary
-                  : AppColors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
+              decoration: BoxDecoration(
                 color: message.isUser
-                    ? AppColors.white
-                    : AppColors.textPrimary,
-                fontSize: 15,
+                    ? const Color(0xFF6366F1)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  message.text,
+                  style: TextStyle(
+                    color: message.isUser
+                        ? Colors.white
+                        : const Color(0xFF1E293B),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+            if (message.isUser)
+              Container(
+                margin: const EdgeInsets.only(right: 8, top: 4),
+                child: Text(
+                  'You',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
