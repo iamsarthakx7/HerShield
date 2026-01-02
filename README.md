@@ -137,52 +137,82 @@ This protects users when visibly using a safety app could increase danger.
 ---
 
 ### 🔐 Authentication
-<img src="screenshots/login_page.png" width="240" height="480" /> | <img src="screenshots/register.png" width="240" height="480" />
+
+| Login | Register |
+|------|----------|
+| <img src="screenshots/login_page.png" width="160" /> | <img src="screenshots/register.png" width="160" /> |
 
 ---
 
 ### 🧾 Profile Setup (Mandatory Safety Information)
-<img src="screenshots/personalInfo.png" width="240" height="480" /> | <img src="screenshots/emergency_contact.png" width="240" height="480" /> | <img src="screenshots/emergency_contact_saved.png" width="240" height="480" />
+
+| Personal Info | Add Contact | Contact Saved |
+|---------------|-------------|---------------|
+| <img src="screenshots/personalInfo.png" width="160" /> | <img src="screenshots/emergency_contact.png" width="160" /> | <img src="screenshots/emergency_contact_saved.png" width="160" /> |
 
 ---
 
 ### 🏠 Home Screen & SOS Entry Point
-<img src="screenshots/home.png" width="240" height="480" />
+
+| Home |
+|------|
+| <img src="screenshots/home.png" width="160" /> |
 
 ---
 
 ### 🧠 AI Safety Assistant
-<img src="screenshots/safety_chat.png" width="240" height="480" />
+
+| Safety Chat |
+|-------------|
+| <img src="screenshots/safety_chat.png" width="160" /> |
 
 ---
 
 ### 🚨 Emergency Mode (SOS Active)
-<img src="screenshots/emergency.png" width="240" height="480" /> | <img src="screenshots/emergency2.png" width="240" height="480" />
+
+| Emergency Active | Live Tracking |
+|------------------|---------------|
+| <img src="screenshots/emergency.png" width="160" /> | <img src="screenshots/emergency2.png" width="160" /> |
 
 ---
 
 ### 🕶️ Stealth Mode (Calculator Disguise)
-<img src="screenshots/calculator.png" width="240" height="480" />
+
+| Calculator Mode |
+|-----------------|
+| <img src="screenshots/calculator.png" width="160" /> |
 
 ---
 
 ### 👤 Profile & Edit Flow
-<img src="screenshots/profile1.png" width="240" height="480" /> | <img src="screenshots/profile2.png" width="240" height="480" /> | <img src="screenshots/edit_profile.png" width="240" height="480" /> | <img src="screenshots/edit_profile2.png" width="240" height="480" /> | <img src="screenshots/edit_profile3.png" width="240" height="480" />
+
+| Profile | Profile Details | Edit Profile | Edit Step 2 | Edit Step 3 |
+|--------|-----------------|--------------|-------------|-------------|
+| <img src="screenshots/profile1.png" width="140" /> | <img src="screenshots/profile2.png" width="140" /> | <img src="screenshots/edit_profile.png" width="140" /> | <img src="screenshots/edit_profile2.png" width="140" /> | <img src="screenshots/edit_profile3.png" width="140" /> |
 
 ---
 
 ### 📜 SOS History
-<img src="screenshots/history.png" width="240" height="480" />
+
+| History |
+|---------|
+| <img src="screenshots/history.png" width="160" /> |
 
 ---
 
 ### ⚙️ Settings & Permissions
-<img src="screenshots/settings1.png" width="240" height="480" /> | <img src="screenshots/settings2.png" width="240" height="480" />
+
+| Settings | Permissions |
+|----------|-------------|
+| <img src="screenshots/settings1.png" width="160" /> | <img src="screenshots/settings2.png" width="160" /> |
 
 ---
 
 ### 📇 Emergency Contacts Management
-<img src="screenshots/emergency_contact_saved2.png" width="240" height="480" />
+
+| Saved Contacts |
+|----------------|
+| <img src="screenshots/emergency_contact_saved2.png" width="160" /> |
 
 
 ---
