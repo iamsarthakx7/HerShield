@@ -137,15 +137,12 @@ This protects users when visibly using a safety app could increase danger.
 ---
 
 ### 🔐 Authentication
-<img src="screenshots/login_page.png" width="240" height="480" />
-<img src="screenshots/register.png" width="240" height="480" />
+<img src="screenshots/login_page.png" width="240" height="480" /> | <img src="screenshots/register.png" width="240" height="480" />
 
 ---
 
 ### 🧾 Profile Setup (Mandatory Safety Information)
-<img src="screenshots/personalInfo.png" width="240" height="480" />
-<img src="screenshots/emergency_contact.png" width="240" height="480" />
-<img src="screenshots/emergency_contact_saved.png" width="240" height="480" />
+<img src="screenshots/personalInfo.png" width="240" height="480" /> | <img src="screenshots/emergency_contact.png" width="240" height="480" /> | <img src="screenshots/emergency_contact_saved.png" width="240" height="480" />
 
 ---
 
@@ -160,8 +157,7 @@ This protects users when visibly using a safety app could increase danger.
 ---
 
 ### 🚨 Emergency Mode (SOS Active)
-<img src="screenshots/emergency.png" width="240" height="480" />
-<img src="screenshots/emergency2.png" width="240" height="480" />
+<img src="screenshots/emergency.png" width="240" height="480" /> | <img src="screenshots/emergency2.png" width="240" height="480" />
 
 ---
 
@@ -171,11 +167,7 @@ This protects users when visibly using a safety app could increase danger.
 ---
 
 ### 👤 Profile & Edit Flow
-<img src="screenshots/profile1.png" width="240" height="480" />
-<img src="screenshots/profile2.png" width="240" height="480" />
-<img src="screenshots/edit_profile.png" width="240" height="480" />
-<img src="screenshots/edit_profile2.png" width="240" height="480" />
-<img src="screenshots/edit_profile3.png" width="240" height="480" />
+<img src="screenshots/profile1.png" width="240" height="480" /> | <img src="screenshots/profile2.png" width="240" height="480" /> | <img src="screenshots/edit_profile.png" width="240" height="480" /> | <img src="screenshots/edit_profile2.png" width="240" height="480" /> | <img src="screenshots/edit_profile3.png" width="240" height="480" />
 
 ---
 
@@ -185,8 +177,7 @@ This protects users when visibly using a safety app could increase danger.
 ---
 
 ### ⚙️ Settings & Permissions
-<img src="screenshots/settings1.png" width="240" height="480" />
-<img src="screenshots/settings2.png" width="240" height="480" />
+<img src="screenshots/settings1.png" width="240" height="480" /> | <img src="screenshots/settings2.png" width="240" height="480" />
 
 ---
 
