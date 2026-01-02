@@ -132,104 +132,67 @@ This protects users when visibly using a safety app could increase danger.
 
 ## 📱 App Screens
 
-> Below are real screenshots captured from the working **HerShield** prototype.
+> Screenshots from the fully functional **HerShield** prototype.
 
 ---
 
-### 🔐 Authentication Flow
-Secure login and registration using Firebase Authentication.
-
-<p align="center">
-  <img src="screenshots/login_page.png" width="45%" />
-  <img src="screenshots/register.png" width="45%" />
-</p>
+### 🔐 Authentication
+<img src="screenshots/login_page.png" width="240" height="480" />
+<img src="screenshots/register.png" width="240" height="480" />
 
 ---
 
-### 🧾 Profile Setup (First-Time User)
-Mandatory safety details required for emergency situations.
-
-<p align="center">
-  <img src="screenshots/personalInfo.png" width="45%" />
-  <img src="screenshots/emergency_contact.png" width="45%" />
-</p>
-
-<p align="center">
-  <img src="screenshots/emergency_contact_saved.png" width="45%" />
-  <img src="screenshots/emergency_contact_saved2.png" width="45%" />
-</p>
+### 🧾 Profile Setup (Mandatory Safety Information)
+<img src="screenshots/personalInfo.png" width="240" height="480" />
+<img src="screenshots/emergency_contact.png" width="240" height="480" />
+<img src="screenshots/emergency_contact_saved.png" width="240" height="480" />
 
 ---
 
-### 🏠 Home Screen & Safety Assistant
-Main dashboard with instant SOS access and AI-powered safety assistant.
-
-<p align="center">
-  <img src="screenshots/home.png" width="45%" />
-  <img src="screenshots/safety_chat.png" width="45%" />
-</p>
+### 🏠 Home Screen & SOS Entry Point
+<img src="screenshots/home.png" width="240" height="480" />
 
 ---
 
-### 🚨 Emergency Mode (Active SOS)
-Live SOS screen with continuous location sharing and emergency actions.
+### 🧠 AI Safety Assistant
+<img src="screenshots/safety_chat.png" width="240" height="480" />
 
-<p align="center">
-  <img src="screenshots/emergency.png" width="45%" />
-  <img src="screenshots/emergency2.png" width="45%" />
-</p>
+---
+
+### 🚨 Emergency Mode (SOS Active)
+<img src="screenshots/emergency.png" width="240" height="480" />
+<img src="screenshots/emergency2.png" width="240" height="480" />
 
 ---
 
 ### 🕶️ Stealth Mode (Calculator Disguise)
-Calculator-style UI to silently continue SOS in hostile environments.
-
-<p align="center">
-  <img src="screenshots/calculator.png" width="45%" />
-</p>
+<img src="screenshots/calculator.png" width="240" height="480" />
 
 ---
 
-### 👤 Profile & Personal Information
-View stored medical and emergency details.
-
-<p align="center">
-  <img src="screenshots/profile1.png" width="45%" />
-  <img src="screenshots/profile2.png" width="45%" />
-</p>
-
----
-
-### ✏️ Edit Profile
-Update personal details, emergency phone number, and profile photo.
-
-<p align="center">
-  <img src="screenshots/edit_profile.png" width="45%" />
-  <img src="screenshots/edit_profile2.png" width="45%" />
-</p>
-
-<p align="center">
-  <img src="screenshots/edit_profile3.png" width="45%" />
-</p>
+### 👤 Profile & Edit Flow
+<img src="screenshots/profile1.png" width="240" height="480" />
+<img src="screenshots/profile2.png" width="240" height="480" />
+<img src="screenshots/edit_profile.png" width="240" height="480" />
+<img src="screenshots/edit_profile2.png" width="240" height="480" />
+<img src="screenshots/edit_profile3.png" width="240" height="480" />
 
 ---
 
 ### 📜 SOS History
-View past SOS events with duration, timestamps, and location details.
-
-<p align="center">
-  <img src="screenshots/history.png" width="45%" />
-</p>
+<img src="screenshots/history.png" width="240" height="480" />
 
 ---
 
 ### ⚙️ Settings & Permissions
-Manage profile, SOS history, emergency contacts, and app permissions.
+<img src="screenshots/settings1.png" width="240" height="480" />
+<img src="screenshots/settings2.png" width="240" height="480" />
 
-<p align="center">
-  <img src="screenshots/settings1.png" width="45%" />
-  <img src="screenshots/settings2.png" width="45%" />
-</p>
+---
+
+### 📇 Emergency Contacts Management
+<img src="screenshots/emergency_contact_saved2.png" width="240" height="480" />
+
 
 ---
 
