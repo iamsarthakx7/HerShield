@@ -130,15 +130,106 @@ This protects users when visibly using a safety app could increase danger.
 
 ---
 
-## 📱 **App Screens**
+## 📱 App Screens
 
-* Home Screen (SOS + AI Assistant access)
-* Safety Chat Screen (AI Safety Assistant)
-* Emergency Screen (Live SOS + Actions)
-* Stealth Calculator Screen
-* Profile & Emergency Contacts
-* SOS History
-* Settings
+> Below are real screenshots captured from the working **HerShield** prototype.
+
+---
+
+### 🔐 Authentication Flow
+Secure login and registration using Firebase Authentication.
+
+<p align="center">
+  <img src="screenshots/login_page.png" width="45%" />
+  <img src="screenshots/register.png" width="45%" />
+</p>
+
+---
+
+### 🧾 Profile Setup (First-Time User)
+Mandatory safety details required for emergency situations.
+
+<p align="center">
+  <img src="screenshots/personalInfo.png" width="45%" />
+  <img src="screenshots/emergency_contact.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="screenshots/emergency_contact_saved.png" width="45%" />
+  <img src="screenshots/emergency_contact_saved2.png" width="45%" />
+</p>
+
+---
+
+### 🏠 Home Screen & Safety Assistant
+Main dashboard with instant SOS access and AI-powered safety assistant.
+
+<p align="center">
+  <img src="screenshots/home.png" width="45%" />
+  <img src="screenshots/safety_chat.png" width="45%" />
+</p>
+
+---
+
+### 🚨 Emergency Mode (Active SOS)
+Live SOS screen with continuous location sharing and emergency actions.
+
+<p align="center">
+  <img src="screenshots/emergency.png" width="45%" />
+  <img src="screenshots/emergency2.png" width="45%" />
+</p>
+
+---
+
+### 🕶️ Stealth Mode (Calculator Disguise)
+Calculator-style UI to silently continue SOS in hostile environments.
+
+<p align="center">
+  <img src="screenshots/calculator.png" width="45%" />
+</p>
+
+---
+
+### 👤 Profile & Personal Information
+View stored medical and emergency details.
+
+<p align="center">
+  <img src="screenshots/profile1.png" width="45%" />
+  <img src="screenshots/profile2.png" width="45%" />
+</p>
+
+---
+
+### ✏️ Edit Profile
+Update personal details, emergency phone number, and profile photo.
+
+<p align="center">
+  <img src="screenshots/edit_profile.png" width="45%" />
+  <img src="screenshots/edit_profile2.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="screenshots/edit_profile3.png" width="45%" />
+</p>
+
+---
+
+### 📜 SOS History
+View past SOS events with duration, timestamps, and location details.
+
+<p align="center">
+  <img src="screenshots/history.png" width="45%" />
+</p>
+
+---
+
+### ⚙️ Settings & Permissions
+Manage profile, SOS history, emergency contacts, and app permissions.
+
+<p align="center">
+  <img src="screenshots/settings1.png" width="45%" />
+  <img src="screenshots/settings2.png" width="45%" />
+</p>
 
 ---
 
